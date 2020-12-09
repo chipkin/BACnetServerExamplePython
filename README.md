@@ -60,6 +60,10 @@ FYI: Updating AnalogInput (0) PresentValue:  100.6
 
 This python script requires the [CAS BACnet Stack](https://www.bacnetstack.com/) DLL that can be purchased from [Chipkin Automation Systems](https://store.chipkin.com)
 
+```bash
+pip install pathlib
+```
+
 ## Useful links
 
 - [Python ctypes](https://docs.python.org/3/library/ctypes.html)

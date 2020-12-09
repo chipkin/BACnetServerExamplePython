@@ -272,7 +272,7 @@ if __name__ == "__main__":
 
     # Note: 
     # Make sure you keep references to CFUNCTYPE() objects as long as they are used from C code. 
-    # ctypes doesn’t, and if you don’t, they may be garbage collected, crashing your program when 
+    # ctypes doesn't, and if you don't, they may be garbage collected, crashing your program when 
     # a callback is made
     #
     # Because of garbage collection. The pyCallback**** functions need to stay in scope. 

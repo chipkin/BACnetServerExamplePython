@@ -7,12 +7,21 @@
 import ctypes
 import platform
 
-casbacnetstack_adapter_version = "0.0.1" # For CASBACnetStack version 3.19.2 or greater 
+casbacnetstack_adapter_version = "0.0.2" # For CASBACnetStack version 3.19.2 or greater 
 
 # libname
 # ---------------------------------------------------------------------------
 # Depending on the platform we will need to import a different CAS BACnet Stack libary 
 # https://stackoverflow.com/a/54837707 
+
+# Debug 
+# print("os.name                      ",  os.name)
+# print("sys.platform                 ",  sys.platform)
+# print("sysconfig.get_platform()     ",  sysconfig.get_platform())
+# print("platform.system()            ",  platform.system())
+# print("platform.machine()           ",  platform.machine())
+# print("platform.architecture()      ",  platform.architecture())
+
 if platform.system() == 'Windows':
     if platform.architecture()[0] == '64bit':
         libname = "CASBACnetStack_x64_Debug.dll"
@@ -23,8 +32,12 @@ if platform.system() == 'Windows':
 elif  platform.system() == 'Linux':
     if platform.architecture()[0] == '64bit':
         libname = "CASBACnetStack_x64_Debug.so"
-    elif  platform.architecture()[0] == '32bit':
-        libname = "CASBACnetStack_x86_Debug.so"
+    elif platform.architecture()[0] == '32bit':
+        if "armv7" in platform.machine(): 
+            # Raspberry PI 3 or 4. Arm7 
+            libname = "libCASBACnetStack_arm7_Release.so"
+        else:
+            libname = "CASBACnetStack_x86_Debug.so"
     else:
         print( "Error: Could not detect the platform.architecture", platform.architecture() )
 else:
