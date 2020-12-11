@@ -11,6 +11,11 @@ from CASBACnetStackAdapter import * # Contains all the Enumerations, and callbac
 # Example database 
 # -----------------------------------------------------------------------------
 # This is an example database. Normaly this data would come from your sensor/database
+#
+# Units. A full list of units can be found here bacnet_engineeringUnits 
+# 'no_units': 95, 
+# 'degreescelsius': 62
+
 db = { 
     "device": { 
         "instance": 389001,
@@ -18,7 +23,8 @@ db = {
     "analogInput": {
         "instance": 0,
         "objectName": "AnalogInput Bronze",
-        "presentValue": 99.6 },
+        "presentValue": 99.6,
+        "units": 62 },
     "binaryInput": {
         "instance": 3,
         "objectName": "BinaryInput Emerald",
@@ -30,53 +36,43 @@ db = {
     "analogOutput": {
         "instance": 1,
         "objectName": "AnalogOutput Chartreuse",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "analogValue": {
         "instance": 2,
         "objectName": "AnalogValue Diamond",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "binaryOutput": {
         "instance": 4,
         "objectName": "BinaryOutput Fuchsia",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "binaryValue": {
         "instance": 5,
         "objectName": "BinaryValue Gold",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "multiStateOutput": {
         "instance": 14,
         "objectName": "MultiStateOutput Indigo",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "multiStateValue": {
         "instance": 15,
         "objectName": "MultiStateValue Kiwi",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "characterstringValue": {
         "instance": 40,
         "objectName": "CharacterstringValue Nickel",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "integerValue": {
         "instance": 45,
         "objectName": "IntegerValue Purple",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "largeAnalogValue": {
         "instance": 46,
         "objectName": "LargeAnalogValue Quartz",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "positiveIntegerValue": {
         "instance": 48,
         "objectName": "PositiveIntegerValue Silver",
-        "presentValue": 1 
-    },
+        "presentValue": 1},
     "networkPort": {
         "BACnetIPUDPPort": 47808 
     }
@@ -205,6 +201,13 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
     # Return false. The CAS BACnet Stack will use a default value. 
     return False
 
+def ValueToKey(enumeration, searchValue):
+    # https://www.geeksforgeeks.org/python-get-key-from-value-in-dictionary/ 
+    for key, value in enumeration.items():
+         if value == searchValue:
+             return key 
+    return "key doesn't exist"
+
 def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     print( "CallbackGetPropertyEnumerated", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex )
 
@@ -213,6 +216,15 @@ def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, pr
             if objectType == bacnet_objectType["binaryInput"] and objectInstance == db["binaryInput"]["instance"]: 
                 value[0] = ctypes.c_uint32(db["binaryInput"]["presentValue"])
                 return True 
+        if propertyIdentifier == bacnet_propertyIdentifier['units']:
+            if ValueToKey(bacnet_objectType, objectType) in db:
+                if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
+                    value[0] = ctypes.c_uint32( db[ValueToKey(bacnet_objectType, objectType)]["units"] )
+                    return True
+            
+            # Undefined units. use no units 
+            value[0] = ctypes.c_uint32( bacnet_engineeringUnits['no_units'])
+            return True 
 
     # Return false. The CAS BACnet Stack will use a default value. 
     return False
@@ -245,7 +257,7 @@ def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, property
 # Main application 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print ("FYI: CAS BACnet Stack Python Server Example v0.0.1"); 
+    print ("FYI: CAS BACnet Stack Python Server Example v0.0.2"); 
     print ("FYI: https://github.com/chipkin/BACnetServerExamplePython"); 
 
     # 1. Load the CAS BACnet stack functions
