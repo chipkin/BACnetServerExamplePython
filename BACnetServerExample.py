@@ -12,23 +12,33 @@ from CASBACnetStackAdapter import * # Contains all the Enumerations, and callbac
 # -----------------------------------------------------------------------------
 # This is an example database. Normaly this data would come from your sensor/database
 #
-# Units. A full list of units can be found here bacnet_engineeringUnits 
-# 'no_units': 95, 
-# 'degreescelsius': 62
+# Units.
+# no_units (95), 
+# degreescelsius (62)
+# ... 
+#
+# Reliablity 
+# no-fault-detected (0),
+# no-sensor (1)
+# ... 
 
 db = { 
     "device": { 
         "instance": 389001,
-        "objectName": "Device Rainbow"},
+        "objectName": "Device Rainbow",
+        "vendorname": "Exmaple Chipkin Automation Systems",
+        "vendoridentifier": 0},
     "analogInput": {
         "instance": 0,
         "objectName": "AnalogInput Bronze",
         "presentValue": 99.6,
-        "units": 62 },
+        "units": 62,
+        "reliability": 1 },
     "binaryInput": {
         "instance": 3,
         "objectName": "BinaryInput Emerald",
-        "presentValue": 1},
+        "presentValue": 1,
+        "reliability": 1},
    "multiStateInput": {
         "instance": 13 , 
         "objectName": "MultiStateInput Hot Pink", 
@@ -169,6 +179,15 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
     print( "CallbackGetPropertyCharString", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex, propertyArrayIndex )
 
     if deviceInstance == db["device"]["instance"]:
+        if propertyIdentifier == bacnet_propertyIdentifier['vendorname'] and objectType ==  bacnet_objectType["device"]:
+            vendorname = db["device"]["vendorname"]
+            # Convert the vendorname from a string to a format that CAS BACnet Stack can process. 
+            b_vendorname = vendorname.encode('utf-8')
+            for i in range( len(b_vendorname) ):
+                value[i] = b_vendorname[i]
+            # Define how long the vendorname is 
+            valueElementCount[0] = len(b_vendorname) 
+            return True 
         if propertyIdentifier == bacnet_propertyIdentifier['objectname']:
             if objectType == bacnet_objectType["analogInput"] and objectInstance == db["analogInput"]["instance"]: 
                 objectName = db["analogInput"]["objectName"]
@@ -221,9 +240,14 @@ def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, pr
                 if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
                     value[0] = ctypes.c_uint32( db[ValueToKey(bacnet_objectType, objectType)]["units"] )
                     return True
+        if propertyIdentifier == bacnet_propertyIdentifier['reliability']:
+            if ValueToKey(bacnet_objectType, objectType) in db:
+                if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
+                    value[0] = ctypes.c_uint32( db[ValueToKey(bacnet_objectType, objectType)]["reliability"] )
+                    return True
             
-            # Undefined units. use no units 
-            value[0] = ctypes.c_uint32( bacnet_engineeringUnits['no_units'])
+            # Undefined reliability. Assume no-fault-detected (0)
+            value[0] = ctypes.c_uint32( 0 )
             return True 
 
     # Return false. The CAS BACnet Stack will use a default value. 
@@ -252,12 +276,18 @@ def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, property
     return False
 def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     print("CallbackGetPropertyUInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex )
+    if deviceInstance == db["device"]["instance"]:
+        if propertyIdentifier == bacnet_propertyIdentifier['vendoridentifier']:
+            if objectType == bacnet_objectType["device"]: 
+                value[0] = ctypes.c_uint32(db["device"]["vendoridentifier"])
+                return True 
+
     return False
 
 # Main application 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print ("FYI: CAS BACnet Stack Python Server Example v0.0.2"); 
+    print ("FYI: CAS BACnet Stack Python Server Example v0.0.3"); 
     print ("FYI: https://github.com/chipkin/BACnetServerExamplePython"); 
 
     # 1. Load the CAS BACnet stack functions
@@ -339,6 +369,9 @@ if __name__ == "__main__":
     if( CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"]) == False ):
         print( "Error: Failed to add analogInput")
         exit() 
+
+    # Enable optionl properties 
+    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"], bacnet_propertyIdentifier["reliability"], True)    
 
     # BinaryInput (BI) 
     print( "FYI: Adding BinaryInput. BinaryInput.instance=[%d]" %(db["binaryInput"]["instance"]) )
