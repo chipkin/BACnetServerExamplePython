@@ -21,12 +21,12 @@ A basic BACnet IP server example written with Python 3.7 using the [CAS BACnet S
 ## Example output
 
 ```txt
-FYI: CAS BACnet Stack Python Server Example v0.0.1
+FYI: CAS BACnet Stack Python Server Example v0.0.3
 FYI: https://github.com/chipkin/BACnetServerExamplePython
-FYI: CAS BACnet Stack version: 3.20.2.1448
-FYI: CAS BACnet Stack python adapter version: 0.0.1
+FYI: CAS BACnet Stack version: 3.24.10.1696
+FYI: CAS BACnet Stack python adapter version: 0.0.3
 FYI: Connecting UDP Resource to port=[47808]
-FYI: Local IP address:  192.168.2.189
+FYI: Local IP address:  192.168.56.1
 FYI: Registering the Callback Functions with the CAS BACnet Stack
 FYI: Setting up server Device. device.instance=[389001]
 FYI: Adding AnalogInput. AnalogInput.instance=[0]
@@ -58,7 +58,9 @@ FYI: Updating AnalogInput (0) PresentValue:  100.6
 
 ## Building
 
-This python script requires the [CAS BACnet Stack](https://www.bacnetstack.com/) DLL that can be purchased from [Chipkin Automation Systems](https://store.chipkin.com)
+This python script requires the [CAS BACnet Stack](https://www.bacnetstack.com/) DLL that can be purchased from [Chipkin Automation Systems](https://store.chipkin.com).
+
+Place the DLL in the root folder.
 
 ```bash
 pip install pathlib
