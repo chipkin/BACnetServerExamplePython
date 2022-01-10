@@ -21,16 +21,16 @@ A basic BACnet IP server example written with Python 3.7 using the [CAS BACnet S
 ## Example output
 
 ```txt
-FYI: CAS BACnet Stack Python Server Example v0.0.3
+FYI: CAS BACnet Stack Python Server Example v0.0.2
 FYI: https://github.com/chipkin/BACnetServerExamplePython
-FYI: CAS BACnet Stack version: 3.24.10.1696
-FYI: CAS BACnet Stack python adapter version: 0.0.3
+FYI: CAS BACnet Stack version: 3.25.0.0
+FYI: CAS BACnet Stack python adapter version: 0.0.2
 FYI: Connecting UDP Resource to port=[47808]
-FYI: Local IP address:  192.168.56.1
+FYI: Local IP address:  192.168.1.159
 FYI: Registering the Callback Functions with the CAS BACnet Stack
 FYI: Setting up server Device. device.instance=[389001]
 FYI: Adding AnalogInput. AnalogInput.instance=[0]
-FYI: Adding BinaryInput. BinaryInput.instance=[3]
+FYI: Adding BinaryInput. BinaryInput.instance=[db['binaryInput']['instance']]
 FYI: Adding MultiStateInput. MultiStateInput.instance=[13]
 FYI: Adding analogOutput. analogOutput.instance=[1]
 FYI: Adding analogValue. analogValue.instance=[2]
@@ -42,6 +42,7 @@ FYI: Adding characterstringValue. characterstringValue.instance=[40]
 FYI: Adding integerValue. integerValue.instance=[45]
 FYI: Adding largeAnalogValue. largeAnalogValue.instance=[46]
 FYI: Adding positiveIntegerValue. positiveIntegerValue.instance=[48]
+FYI: Adding networkPort. networkPort.instance=[50]
 FYI: Sending I-AM broadcast
 FYI: Entering main loop...
 FYI: Updating AnalogInput (0) PresentValue:  99.7

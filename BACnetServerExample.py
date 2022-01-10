@@ -109,6 +109,7 @@ def octetStringCopy(source, destination, length):
         destination[i] = source[i]
 
 
+# Rebuilds password string from ctype.c_uint_8 arrray
 def rebuildPassword(passwordPointer, length):
     password = ""
     for i in range(0, length):
@@ -122,9 +123,8 @@ def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, 
                            receivedConnectionStringLength, networkType):
     try:
         data, addr = udpSocket.recvfrom(maxMessageLength)
-        if not data:
-            print("DEBUG: not data")
-
+        # if not data:
+        #     print("DEBUG: not data")
         # A message was received.
         # print ("DEBUG: CallbackReceiveMessage. Message Received", addr, data, len(data) )
 
@@ -155,8 +155,6 @@ def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, 
 
 
 def CallbackSendMessage(message, messageLength, connectionString, connectionStringLength, networkType, broadcast):
-    print("DEBUG: CallbackSendMessage messageLength:", messageLength)
-
     # Currently we are only supporting IP
     if networkType != casbacnetstack_networkType["ip"]:
         print("Error: Unsupported network type. networkType:", networkType)
@@ -174,8 +172,6 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
     else:
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
                     f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
-
-    print("DEBUG:   connectionString: ", ipAddress, udpPort)
 
     # Extract the message from CAS BACnet Stack to a bytearray
     data = bytearray(messageLength)
@@ -423,14 +419,12 @@ def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, property
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                print("DEBUG: REACHED Set address port, new fdbbmdaddress port: ", value)
                 db["networkPort"]["FdBbmdAddressPort"] = value
                 db["networkPort"]["changesPending"] = True
                 return True
 
         elif propertyIdentifier == bacnet_propertyIdentifier["fdsubscriptionlifetime"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                print("DEBUG: REACHED Set subscription lifetime, new subscription lifetime: ", value)
                 db["networkPort"]["FdSubscriptionLifetime"] = value
                 db["networkPort"]["changesPending"] = True
                 return True
@@ -508,7 +502,6 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     else:
         # All other states are not supported in this example
         errorCode[0] = bacnet_errorCode["optional-functionality-not-supported"]
-        print("DEBUG: reinitializeDevice ERROR")
         return False
 
 
@@ -548,7 +541,7 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
 # Main application
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("FYI: CAS BACnet Stack Python Server Example v0.0.3")
+    print("FYI: CAS BACnet Stack Python Server Example v0.0.2")
     print("FYI: https://github.com/chipkin/BACnetServerExamplePython")
 
     # 1. Load the CAS BACnet stack functions
