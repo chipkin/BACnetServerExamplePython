@@ -21,10 +21,10 @@ A basic BACnet IP server example written with Python 3.7 using the [CAS BACnet S
 ## Example output
 
 ```txt
-FYI: CAS BACnet Stack Python Server Example v0.0.2
+FYI: CAS BACnet Stack Python Server Example v0.0.4
 FYI: https://github.com/chipkin/BACnetServerExamplePython
 FYI: CAS BACnet Stack version: 3.25.0.0
-FYI: CAS BACnet Stack python adapter version: 0.0.2
+FYI: CAS BACnet Stack python adapter version: 0.0.4
 FYI: Connecting UDP Resource to port=[47808]
 FYI: Local IP address:  192.168.1.159
 FYI: Registering the Callback Functions with the CAS BACnet Stack

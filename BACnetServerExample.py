@@ -541,7 +541,7 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
 # Main application
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("FYI: CAS BACnet Stack Python Server Example v0.0.2")
+    print("FYI: CAS BACnet Stack Python Server Example v0.0.4")
     print("FYI: https://github.com/chipkin/BACnetServerExamplePython")
 
     # 1. Load the CAS BACnet stack functions
