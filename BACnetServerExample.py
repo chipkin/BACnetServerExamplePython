@@ -774,12 +774,12 @@ if __name__ == "__main__":
     # 5. Send I-Am of this device
     # ---------------------------------------------------------------------------
     print("FYI: Sending I-AM broadcast")
-    connectionString = (ctypes.c_uint8 * 6)()
-    octetStringCopy(db["networkPort"]["ipAddress"], connectionString, 4)
-    connectionString[4] = int(db["networkPort"]["BACnetIPUDPPort"] / 256)
-    connectionString[5] = db["networkPort"]["BACnetIPUDPPort"] % 256
+    addressString = (ctypes.c_uint8 * 6)()
+    octetStringCopy(db["networkPort"]["ipAddress"], addressString, 4)
+    addressString[4] = int(db["networkPort"]["BACnetIPUDPPort"] / 256)
+    addressString[5] = db["networkPort"]["BACnetIPUDPPort"] % 256
 
-    if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(db["device"]["instance"]), ctypes.cast(connectionString,
+    if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(db["device"]["instance"]), ctypes.cast(addressString,
                                               ctypes.POINTER( ctypes.c_uint8)), ctypes.c_uint8(6),
                                               ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
                                               ctypes.c_uint16(65535), None, ctypes.c_uint8(0)):
