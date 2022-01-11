@@ -26,11 +26,11 @@ FYI: https://github.com/chipkin/BACnetServerExamplePython
 FYI: CAS BACnet Stack version: 3.25.0.0
 FYI: CAS BACnet Stack python adapter version: 0.0.4
 FYI: Connecting UDP Resource to port=[47808]
-FYI: Local IP address:  192.168.1.159
+FYI: Local IP address:  [192, 168, 1, 130]
 FYI: Registering the Callback Functions with the CAS BACnet Stack
 FYI: Setting up server Device. device.instance=[389001]
 FYI: Adding AnalogInput. AnalogInput.instance=[0]
-FYI: Adding BinaryInput. BinaryInput.instance=[db['binaryInput']['instance']]
+FYI: Adding BinaryInput. BinaryInput.instance=[3]
 FYI: Adding MultiStateInput. MultiStateInput.instance=[13]
 FYI: Adding analogOutput. analogOutput.instance=[1]
 FYI: Adding analogValue. analogValue.instance=[2]
@@ -65,6 +65,7 @@ Place the DLL in the root folder.
 
 ```bash
 pip install pathlib
+pip install dnspython
 ```
 
 ## Useful links

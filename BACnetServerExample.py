@@ -4,8 +4,9 @@
 import ctypes
 import pathlib
 import netifaces
+import dns.resolver     # Package name: dnspython
 import socket
-import time  # sleep function
+import time  # Sleep function
 from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callback prototypes
 
 # Example database
@@ -91,6 +92,7 @@ db = {
         "ipAddress": [192, 168, 1, 199],
         "ipDefaultGateway": [192, 168, 1, 99],
         "ipDnsServer": [1, 2, 3, 4, 5],
+        "ipNumOfDns": 1,
         "ipSubnetMask": [255, 255, 255, 0],
         "FdBbmdAddressHostIp": [192, 168, 1, 4],
         "FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
@@ -105,9 +107,9 @@ udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 lastTimeValueWasUpdated = 0
 
 
-def octetStringCopy(source, destination, length):
+def octetStringCopy(source, destination, length, offset=0):
     for i in range(length):
-        destination[i] = source[i]
+        destination[i + offset] = source[i]
 
 
 # Rebuilds password string from ctype.c_uint_8 arrray
@@ -357,8 +359,9 @@ def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, p
             return True
     elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
         if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipLength"]
-            octetStringCopy(db["networkPort"]["ipDnsServer"], value, valueElementCount[0])
+            valueElementCount[0] = db["networkPort"]["ipNumOfDns"] * 4
+            for i in range(db["networkPort"]["ipNumOfDns"]):
+                octetStringCopy(db["networkPort"]["ipDnsServer"][i], value, 4, i * 4)
             return True
     elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
         if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
@@ -399,7 +402,7 @@ def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, property
         elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
                 if useArrayIndex and propertyArrayIndex == 0:
-                    value[0] = len(db["networkPort"]["ipDnsServer"])
+                    value[0] = db["networkPort"]["ipNumOfDns"]
                     return True
         elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
@@ -452,8 +455,8 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     # Rebuild password from pointer reference
     derefedPassword = rebuildPassword(password, passwordLength)
 
-    print("CallbackReinitializeDevice", "Dev Instance: ", deviceInstance, " retinitState: ", reinitializedState,
-          " password: ", derefedPassword, " passwordLen: ", passwordLength, " errorCode: ", errorCode[0])
+    print("CallbackReinitializeDevice", deviceInstance, reinitializedState, derefedPassword, passwordLength,
+          errorCode[0])
 
     # This callback is called when this BACnet Server device receives a ReinitializeDevice message
     # In this callback, you will handle the reinitializedState
@@ -511,9 +514,8 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
     # Rebuild password from pointer reference
     derefedPassword = rebuildPassword(password, passwordLength)
 
-    print("CallbackDeviceCommunicationControl", "Dev Instance: ", deviceInstance, " enableDisable: ", enableDisable,
-          " password: ", derefedPassword, " passwordLen: ", passwordLength, " useTimeDuration: ", useTimeDuration,
-          " timeDuration: ", timeDuration, " errorCode: ", errorCode[0])
+    print("CallbackDeviceCommunicationControl", deviceInstance, enableDisable, derefedPassword, passwordLength,
+          useTimeDuration, timeDuration, errorCode[0])
 
     # This callback is called when this BACnet Server device receives a DeviceCommunicationControl message
     # In this callback, you will handle the password. All other parameters are purely for logging to know
@@ -566,11 +568,17 @@ if __name__ == "__main__":
     udpSocket.bind((HOST, db["networkPort"]["BACnetIPUDPPort"]))
     udpSocket.setblocking(False)
 
+    # Load network information into database
     db["networkPort"]["ipAddress"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
     db["networkPort"]["ipSubnetMask"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
     db["networkPort"]["ipDefaultGateway"] = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
-    print("FYI: Local IP address: ",
-          netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split("."))
+    dnsServerOctetList = []
+    for dnsServer in dns.resolver.Resolver().nameservers:
+        dnsServerOctetList.append([int(octet) for octet in dnsServer.split(".")])
+    db["networkPort"]["ipNumOfDns"] = len(dnsServerOctetList)
+    db["networkPort"]["ipDnsServer"] = dnsServerOctetList
+
+    print("FYI: Local IP address: ", db["networkPort"]["ipAddress"])
 
     # 3. Setup the callbacks
     # ---------------------------------------------------------------------------
@@ -663,7 +671,7 @@ if __name__ == "__main__":
                                                   bacnet_propertyIdentifier["reliability"], True)
 
     # BinaryInput (BI)
-    print(f"FYI: Adding BinaryInput. BinaryInput.instance=[db['binaryInput']['instance']]")
+    print(f"FYI: Adding BinaryInput. BinaryInput.instance=[{(db['binaryInput']['instance']):.0f}]")
     if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryInput"],
                                                 db["binaryInput"]["instance"]):
         print("Error: Failed to add BinaryInput")
