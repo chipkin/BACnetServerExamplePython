@@ -3,6 +3,7 @@
 #
 import ctypes
 import pathlib
+import netifaces
 import socket
 import time  # sleep function
 from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callback prototypes
@@ -87,8 +88,8 @@ db = {
         "objectName": "NetworkPort Vermillion",
         "BACnetIPUDPPort": 47808,
         "ipLength": 4,
-        "ipAddress": [192, 168, 1, 159],
-        "ipDefaultGateway": [192, 168, 1, 23],
+        "ipAddress": [192, 168, 1, 199],
+        "ipDefaultGateway": [192, 168, 1, 99],
         "ipDnsServer": [1, 2, 3, 4, 5],
         "ipSubnetMask": [255, 255, 255, 0],
         "FdBbmdAddressHostIp": [192, 168, 1, 4],
@@ -165,8 +166,8 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
     if broadcast:
         # Use broadcast IP address
         # ToDo: Get the subnet mask and apply it to the IP address
-        print("DEBUG:   ToDo: Broadcast this message. Local IP: ", socket.gethostbyname(socket.gethostname()),
-              "Subnet: ????, Broadcast IP: ????")
+        print("DEBUG:   ToDo: Broadcast this message. Local IP: ", db["networkPort"]["ipAddress"],
+              "Subnet: ", db["networkPort"]["ipSubnetMask"], "Broadcast IP: ????")
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
                     f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
     else:
@@ -558,13 +559,18 @@ if __name__ == "__main__":
           f"{CASBACnetStack.BACnetStack_GetAPIBuildVersion():.0f}")
     print(f"FYI: CAS BACnet Stack python adapter version: {casbacnetstack_adapter_version}")
 
-    # 2. Connect the UDP resource to the BACnet Port
+    # 2. Connect the UDP resource to the BACnet Port and get network info
     # ---------------------------------------------------------------------------
     print(f"FYI: Connecting UDP Resource to port=[{db['networkPort']['BACnetIPUDPPort']:.0f}]")
     HOST = ""  # Symbolic name meaning all available interfaces
     udpSocket.bind((HOST, db["networkPort"]["BACnetIPUDPPort"]))
     udpSocket.setblocking(False)
-    print("FYI: Local IP address: ", socket.gethostbyname(socket.gethostname()))
+
+    db["networkPort"]["ipAddress"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
+    db["networkPort"]["ipSubnetMask"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
+    db["networkPort"]["ipDefaultGateway"] = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
+    print("FYI: Local IP address: ",
+          netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split("."))
 
     # 3. Setup the callbacks
     # ---------------------------------------------------------------------------
