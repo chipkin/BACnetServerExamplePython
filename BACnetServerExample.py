@@ -813,4 +813,10 @@ if __name__ == "__main__":
         if lastTimeValueWasUpdated + 1 < time.time():
             lastTimeValueWasUpdated = time.time()
             db["analogInput"]["presentValue"] += 0.1
+            # Notify the stack that this data point was updated so the stack can check for logic
+            # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
+            if CASBACnetStack.BACnetStack_ValueUpdated is not None:
+                CASBACnetStack.BACnetStack_ValueUpdated(db["device"]["instance"], bacnet_objectType["analogValue"],
+                                                        db["analogValue"]["instance"],
+                                                        bacnet_propertyIdentifier["presentValue"])
             print("FYI: Updating AnalogInput (0) PresentValue: ", round(db["analogInput"]["presentValue"], 1))
