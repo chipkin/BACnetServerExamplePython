@@ -4,7 +4,7 @@
 import ctypes
 import pathlib
 import netifaces
-import dns.resolver     # Package name: dnspython
+import dns.resolver  # Package name: dnspython
 import socket
 import time  # Sleep function
 from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callback prototypes
@@ -14,91 +14,97 @@ from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callba
 # This is an example database. Normally this data would come from your sensor/database
 #
 # Units.
-# no_units (95),
-# degreescelsius (62)
+# no_units (95),celsius (62)
 # ...
 #
 # Reliability
-# no-fault-detected (0),
-# no-sensor (1)
+# no-fault-detected (0),or (1)
 # ...
 
 db = {
     "device": {
-        "instance": 389001,
-        "objectName": "Device Rainbow",
-        "vendorname": "Example Chipkin Automation Systems",
-        "vendoridentifier": 0},
-    "analogInput": {
-        "instance": 0,
-        "objectName": "AnalogInput Bronze",
-        "presentValue": 99.6,
-        "units": 62,
-        "reliability": 1},
-    "binaryInput": {
-        "instance": 3,
-        "objectName": "BinaryInput Emerald",
-        "presentValue": 1,
-        "reliability": 1},
-    "multiStateInput": {
-        "instance": 13,
-        "objectName": "MultiStateInput Hot Pink",
-        "presentValue": 3},
-    "analogOutput": {
-        "instance": 1,
-        "objectName": "AnalogOutput Chartreuse",
-        "presentValue": 1},
-    "analogValue": {
-        "instance": 2,
-        "objectName": "AnalogValue Diamond",
-        "presentValue": 1},
-    "binaryOutput": {
-        "instance": 4,
-        "objectName": "BinaryOutput Fuchsia",
-        "presentValue": 1},
-    "binaryValue": {
-        "instance": 5,
-        "objectName": "BinaryValue Gold",
-        "presentValue": 1},
-    "multiStateOutput": {
-        "instance": 14,
-        "objectName": "MultiStateOutput Indigo",
-        "presentValue": 1},
-    "multiStateValue": {
-        "instance": 15,
-        "objectName": "MultiStateValue Kiwi",
-        "presentValue": 1},
-    "characterstringValue": {
-        "instance": 40,
-        "objectName": "CharacterstringValue Nickel",
-        "presentValue": 1},
-    "integerValue": {
-        "instance": 45,
-        "objectName": "IntegerValue Purple",
-        "presentValue": 1},
-    "largeAnalogValue": {
-        "instance": 46,
-        "objectName": "LargeAnalogValue Quartz",
-        "presentValue": 1},
-    "positiveIntegerValue": {
-        "instance": 48,
-        "objectName": "PositiveIntegerValue Silver",
-        "presentValue": 1},
-    "networkPort": {
-        "instance": 50,
-        "objectName": "NetworkPort Vermillion",
-        "BACnetIPUDPPort": 47808,
-        "ipLength": 4,
-        "ipAddress": [192, 168, 1, 199],
-        "ipDefaultGateway": [192, 168, 1, 99],
-        "ipDnsServer": [1, 2, 3, 4, 5],
-        "ipNumOfDns": 1,
-        "ipSubnetMask": [255, 255, 255, 0],
-        "FdBbmdAddressHostIp": [192, 168, 1, 4],
-        "FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
-        "FdBbmdAddressPort": 47808,
-        "FdSubscriptionLifetime": 3000,
-        "changesPending": False}
+        "instance": 389001, objectName": "Device Rainbow",vendorname": "Example Chipkin Automation Systems", vendoridentifier": 0},ogInput": {
+    "instance": 0, objectName": "AnalogInput Bronze",presentValue": 99.6, units": 62,reliability": 1}, ryInput
+": {
+"instance": 3, objectName
+": "
+BinaryInput
+Emerald
+",presentValue": 1, reliability
+": 1},iStateInput": {
+    "instance": 13, objectName": "MultiStateInput Hot Pink",presentValue": 3}, ogOutput
+": {
+"instance": 1, objectName
+": "
+AnalogOutput
+Chartreuse
+",presentValue": 1}, ogValue
+": {
+"instance": 2, objectName
+": "
+AnalogValue
+Diamond
+",presentValue": 1}, ryOutput
+": {
+"instance": 4, objectName
+": "
+BinaryOutput
+Fuchsia
+",presentValue": 1}, ryValue
+": {
+"instance": 5, objectName
+": "
+BinaryValue
+Gold
+",presentValue": 1}, iStateOutput
+": {
+"instance": 14, objectName
+": "
+MultiStateOutput
+Indigo
+",presentValue": 1}, iStateValue
+": {
+"instance": 15, objectName
+": "
+MultiStateValue
+Kiwi
+",presentValue": 1}, acterstringValue
+": {
+"instance": 40, objectName
+": "
+CharacterstringValue
+Nickel
+",presentValue": 1}, gerValue
+": {
+"instance": 45, objectName
+": "
+IntegerValue
+Purple
+",presentValue": 1}, eAnalogValue
+": {
+"instance": 46, objectName
+": "
+LargeAnalogValue
+Quartz
+",presentValue": 1}, tiveIntegerValue
+": {
+"instance": 48, objectName
+": "
+PositiveIntegerValue
+Silver
+",presentValue": 1}, orkPort
+": {
+"instance": 50, objectName
+": "
+NetworkPort
+Vermillion
+",BACnetIPUDPPort": 47808, ipLength
+": 4,ipAddress": [192, 168, 1, 199], ipDefaultGateway
+": [192, 168, 1, 99],ipDnsServer": [1, 2, 3, 4, 5], ipNumOfDns
+": 1,ipSubnetMask": [255, 255, 255, 0], FdBbmdAddressHostIp
+": [192, 168, 1, 4],FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
+"FdBbmdAddressPort": 47808, FdSubscriptionLifetime
+": 3000,changesPending": False}
 }
 
 # Globals
@@ -122,8 +128,8 @@ def rebuildPassword(passwordPointer, length):
 
 # Callbacks
 # -----------------------------------------------------------------------------
-def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, maxConnectionStringLength,
-                           receivedConnectionStringLength, networkType):
+def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, maxConnectionStringLength, receivedConnectionStringLength,
+                           networkType):
     try:
         data, addr = udpSocket.recvfrom(maxMessageLength)
         # if not data:
@@ -149,8 +155,7 @@ def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, 
         networkType[0] = ctypes.c_uint8(casbacnetstack_networkType["ip"])
         return len(data)
     except BlockingIOError:
-        # No message,
-        # We are not waiting for a incoming message so our socket returns a BlockingIOError. This is normal.
+        # No message, We are not waiting for a incoming message so our socket returns a BlockingIOError. This is normal.
         return 0
 
     # Catch all
@@ -168,8 +173,8 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
     if broadcast:
         # Use broadcast IP address
         # ToDo: Get the subnet mask and apply it to the IP address
-        print("DEBUG:   ToDo: Broadcast this message. Local IP: ", db["networkPort"]["ipAddress"],
-              "Subnet: ", db["networkPort"]["ipSubnetMask"], "Broadcast IP: ????")
+        print("DEBUG:   ToDo: Broadcast this message. Local IP: ", db["networkPort"]["ipAddress"], "Subnet: ", db["networkPort"]["ipSubnetMask"],
+              "Broadcast IP: ????")
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
                     f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
     else:
@@ -190,10 +195,8 @@ def CallbackGetSystemTime():
     return int(time.time())
 
 
-def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                            propertyArrayIndex):
-    print("CallbackGetPropertyReal", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyReal", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
 
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
@@ -205,10 +208,10 @@ def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, property
     return False
 
 
-def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, propertyIdentifier, value,
-                                  valueElementCount, maxElementCount, encodingType, useArrayIndex, propertyArrayIndex):
-    print("CallbackGetPropertyCharString", deviceInstance, objectType, objectInstance, propertyIdentifier,
-          maxElementCount, useArrayIndex, propertyArrayIndex)
+def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
+                                  encodingType, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyCharString", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex,
+          propertyArrayIndex)
 
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["vendorname"] and objectType == bacnet_objectType["device"]:
@@ -271,10 +274,8 @@ def ValueToKey(enumeration, searchValue):
     return "key doesn't exist"
 
 
-def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                                  propertyArrayIndex):
-    print("CallbackGetPropertyEnumerated", deviceInstance, objectType, objectInstance, propertyIdentifier,
-          propertyArrayIndex)
+def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyEnumerated", deviceInstance, objectType, objectInstance, propertyIdentifier, propertyArrayIndex)
 
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
@@ -304,17 +305,15 @@ def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, pr
     return False
 
 
-def CallbackGetPropertyBitString(deviceInstance, objectType, objectInstance, propertyIdentifier, value,
-                                 valueElementCount, maxElementCount, useArrayIndex, propertyArrayIndex):
-    print("CallbackGetPropertyBitString", deviceInstance, objectType, objectInstance, propertyIdentifier,
-          maxElementCount, useArrayIndex, propertyArrayIndex)
+def CallbackGetPropertyBitString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
+                                 useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyBitString", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex,
+          propertyArrayIndex)
     return False
 
 
-def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                            propertyArrayIndex):
-    print("CallbackGetPropertyBool", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyBool", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["changespending"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
@@ -323,24 +322,20 @@ def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, property
     return False
 
 
-def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, propertyIdentifier, year, month, day, weekday,
-                            useArrayIndex, propertyArrayIndex):
-    print("CallbackGetPropertyDate", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, propertyIdentifier, year, month, day, weekday, useArrayIndex,
+                            propertyArrayIndex):
+    print("CallbackGetPropertyDate", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     return False
 
 
-def CallbackGetPropertyDouble(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                              propertyArrayIndex):
-    print("CallbackGetPropertyDouble", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+def CallbackGetPropertyDouble(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyDouble", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     return False
 
 
-def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value,
-                                   valueElementCount, maxElementCount, useArrayIndex, propertyArrayIndex):
-    print("CallbackGetPropertyOctetString", deviceInstance, objectInstance, propertyIdentifier, maxElementCount,
-          useArrayIndex, propertyArrayIndex)
+def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
+                                   useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyOctetString", deviceInstance, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex, propertyArrayIndex)
     if propertyIdentifier == bacnet_propertyIdentifier["ipaddress"]:
         if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
             valueElementCount[0] = db["networkPort"]["ipLength"]
@@ -371,24 +366,19 @@ def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, p
     return False
 
 
-def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                           propertyArrayIndex):
-    print("CallbackGetPropertyInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     return False
 
 
-def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, propertyIdentifier, hour, minute, second,
-                            hundrethSeconds, useArrayIndex, propertyArrayIndex):
-    print("CallbackGetPropertyTime", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
-    return False
-
-
-def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
+def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, propertyIdentifier, hour, minute, second, hundrethSeconds, useArrayIndex,
                             propertyArrayIndex):
-    print("CallbackGetPropertyUInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex,
-          propertyArrayIndex)
+    print("CallbackGetPropertyTime", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    return False
+
+
+def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
+    print("CallbackGetPropertyUInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["vendoridentifier"]:
             if objectType == bacnet_objectType["device"]:
@@ -416,10 +406,10 @@ def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, property
     return False
 
 
-def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex,
-                            propertyArrayIndex, priority, errorCode):
-    print("CallbackSetPropertyUInt", deviceInstance, objectType, objectInstance, propertyIdentifier, value,
-          useArrayIndex, propertyArrayIndex, priority, errorCode)
+def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex, priority,
+                            errorCode):
+    print("CallbackSetPropertyUInt", deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex,
+          priority, errorCode)
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
@@ -435,10 +425,10 @@ def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, property
     return False
 
 
-def CallbackSetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, length,
-                                   useArrayIndex, propertyArray, priority, errorCode):
-    print("CallbackSetPropertyOctetString", deviceInstance, objectType, objectInstance, propertyIdentifier, value,
-          length, useArrayIndex, propertyArray, priority, errorCode)
+def CallbackSetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex, propertyArray,
+                                   priority, errorCode):
+    print("CallbackSetPropertyOctetString", deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex,
+          propertyArray, priority, errorCode)
     if deviceInstance == db["device"]["instance"]:
         if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
@@ -455,8 +445,7 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     # Rebuild password from pointer reference
     derefedPassword = rebuildPassword(password, passwordLength)
 
-    print("CallbackReinitializeDevice", deviceInstance, reinitializedState, derefedPassword, passwordLength,
-          errorCode[0])
+    print("CallbackReinitializeDevice", deviceInstance, reinitializedState, derefedPassword, passwordLength, errorCode[0])
 
     # This callback is called when this BACnet Server device receives a ReinitializeDevice message
     # In this callback, you will handle the reinitializedState
@@ -509,13 +498,12 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
         return False
 
 
-def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, passwordLength, useTimeDuration,
-                                       timeDuration, errorCode):
+def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, passwordLength, useTimeDuration, timeDuration, errorCode):
     # Rebuild password from pointer reference
     derefedPassword = rebuildPassword(password, passwordLength)
 
-    print("CallbackDeviceCommunicationControl", deviceInstance, enableDisable, derefedPassword, passwordLength,
-          useTimeDuration, timeDuration, errorCode[0])
+    print("CallbackDeviceCommunicationControl", deviceInstance, enableDisable, derefedPassword, passwordLength, useTimeDuration, timeDuration,
+          errorCode[0])
 
     # This callback is called when this BACnet Server device receives a DeviceCommunicationControl message
     # In this callback, you will handle the password. All other parameters are purely for logging to know
@@ -569,8 +557,10 @@ if __name__ == "__main__":
     udpSocket.setblocking(False)
 
     # Load network information into database
-    db["networkPort"]["ipAddress"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
-    db["networkPort"]["ipSubnetMask"] = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
+    db["networkPort"]["ipAddress"] = [int(octet) for octet in
+                                      netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
+    db["networkPort"]["ipSubnetMask"] = [int(octet) for octet in
+                                         netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
     db["networkPort"]["ipDefaultGateway"] = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
     dnsServerOctetList = []
     for dnsServer in dns.resolver.Resolver().nameservers:
@@ -635,94 +625,74 @@ if __name__ == "__main__":
         exit()
 
     # Enable optional BACnet services.
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["readPropertyMultiple"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["writeProperty"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["writePropertyMultiple"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["subscribeCov"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["subscribeCovProperty"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["reinitializeDevice"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["deviceCommunicationControl"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["iAm"])
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["confirmedTextMessage"])
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"],
-                                                 casbacnetstack_service["unconfirmedTextMessage"])
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["readPropertyMultiple"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["writeProperty"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["writePropertyMultiple"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["subscribeCov"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["subscribeCovProperty"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["reinitializeDevice"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["deviceCommunicationControl"], True)
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["iAm"])
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["confirmedTextMessage"])
+    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["unconfirmedTextMessage"])
 
     # Add Objects
     # ---------------------------------------
     # AnalogInput (AI)
     print(f"FYI: Adding AnalogInput. AnalogInput.instance=[{db['analogInput']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogInput"],
-                                                db["analogInput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"]):
         print("Error: Failed to add analogInput")
         exit()
 
     # Enable optional properties
-    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["analogInput"],
-                                                  db["analogInput"]["instance"],
+    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"],
                                                   bacnet_propertyIdentifier["reliability"], True)
 
     # BinaryInput (BI)
     print(f"FYI: Adding BinaryInput. BinaryInput.instance=[{(db['binaryInput']['instance']):.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryInput"],
-                                                db["binaryInput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryInput"], db["binaryInput"]["instance"]):
         print("Error: Failed to add BinaryInput")
         exit()
 
     # MultiStateInput (MSI)
     print(f"FYI: Adding MultiStateInput. MultiStateInput.instance=[{(db['multiStateInput']['instance']):.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateInput"],
-                                                db["multiStateInput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateInput"], db["multiStateInput"]["instance"]):
         print("Error: Failed to add MultiStateInput")
         exit()
 
     # analogOutput
     print(f"FYI: Adding analogOutput. analogOutput.instance=[{db['analogOutput']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogOutput"],
-                                                db["analogOutput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogOutput"], db["analogOutput"]["instance"]):
         print("Error: Failed to add analogOutput")
         exit()
 
     # analogValue
     print(f"FYI: Adding analogValue. analogValue.instance=[{db['analogValue']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogValue"],
-                                                db["analogValue"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogValue"], db["analogValue"]["instance"]):
         print("Error: Failed to add analogValue")
         exit()
 
     # binaryOutput
     print(f"FYI: Adding binaryOutput. binaryOutput.instance=[{db['binaryOutput']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryOutput"],
-                                                db["binaryOutput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryOutput"], db["binaryOutput"]["instance"]):
         print("Error: Failed to add binaryOutput")
         exit()
 
     # binaryValue
     print(f"FYI: Adding binaryValue. binaryValue.instance=[{db['binaryValue']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryValue"],
-                                                db["binaryValue"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryValue"], db["binaryValue"]["instance"]):
         print("Error: Failed to add binaryValue")
         exit()
 
     # multiStateOutput
     print(f"FYI: Adding multiStateOutput. multiStateOutput.instance=[{db['multiStateOutput']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateOutput"],
-                                                db["multiStateOutput"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateOutput"], db["multiStateOutput"]["instance"]):
         print("Error: Failed to add multiStateOutput")
         exit()
 
     # multiStateValue
     print(f"FYI: Adding multiStateOutput. multiStateValue.instance=[{db['multiStateValue']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateValue"],
-                                                db["multiStateValue"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateValue"], db["multiStateValue"]["instance"]):
         print("Error: Failed to add multiStateValue")
         exit()
 
@@ -736,15 +706,13 @@ if __name__ == "__main__":
 
     # integerValue
     print(f"FYI: Adding integerValue. integerValue.instance=[{db['integerValue']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["integerValue"],
-                                                db["integerValue"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["integerValue"], db["integerValue"]["instance"]):
         print("Error: Failed to add integerValue")
         exit()
 
     # largeAnalogValue
     print(f"FYI: Adding largeAnalogValue. largeAnalogValue.instance=[{db['largeAnalogValue']['instance']:.0f}]")
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["largeAnalogValue"],
-                                                db["largeAnalogValue"]["instance"]):
+    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["largeAnalogValue"], db["largeAnalogValue"]["instance"]):
         print("Error: Failed to add largeAnalogValue")
         exit()
 
@@ -760,28 +728,20 @@ if __name__ == "__main__":
     print(f"FYI: Adding networkPort. networkPort.instance="
           f"[{db['networkPort']['instance']:.0f}]")
     if not CASBACnetStack.BACnetStack_AddNetworkPortObject(db["device"]["instance"], db["networkPort"]["instance"],
-                                                           casbacnetstack_networkType["ipv4"],
-                                                           casbacnetstack_protocolLevel["bacnet-application"],
+                                                           casbacnetstack_networkType["ipv4"], casbacnetstack_protocolLevel["bacnet-application"],
                                                            casbacnetstack_network_port_lowest_protocol_level):
         print("Error: Failed to add networkPort")
         exit()
-    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"],
-                                                         bacnet_objectType["networkPort"],
-                                                         db["networkPort"]["instance"],
+    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
                                                          bacnet_propertyIdentifier["fdbbmdaddress"], True):
         print("Error: Failed to enable fdBbmdAddress")
-    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"],
-                                                         bacnet_objectType["networkPort"],
-                                                         db["networkPort"]["instance"],
-                                                         bacnet_propertyIdentifier["fdsubscriptionlifetime"],
-                                                         True):
+    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
+                                                         bacnet_propertyIdentifier["fdsubscriptionlifetime"], True):
         print("Error: Failed to enable fdSubscriptionLifetime")
-    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"],
-                                                          db["networkPort"]["instance"],
+    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
                                                           bacnet_propertyIdentifier["fdbbmdaddress"], True):
         print("Error: Failed to set fdBbmdAddress to writable")
-    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"],
-                                                          db["networkPort"]["instance"],
+    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
                                                           bacnet_propertyIdentifier["fdsubscriptionlifetime"], True):
         print("Error: Failed to set fdSubscriptionLifetime to writable")
 
@@ -793,9 +753,8 @@ if __name__ == "__main__":
     addressString[4] = int(db["networkPort"]["BACnetIPUDPPort"] / 256)
     addressString[5] = db["networkPort"]["BACnetIPUDPPort"] % 256
 
-    if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(db["device"]["instance"]), ctypes.cast(addressString,
-                                              ctypes.POINTER( ctypes.c_uint8)), ctypes.c_uint8(6),
-                                              ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
+    if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(db["device"]["instance"]), ctypes.cast(addressString, ctypes.POINTER(ctypes.c_uint8)),
+                                              ctypes.c_uint8(6), ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
                                               ctypes.c_uint16(65535), None, ctypes.c_uint8(0)):
         print("Error: Failed to send I-Am")
 
@@ -813,4 +772,9 @@ if __name__ == "__main__":
         if lastTimeValueWasUpdated + 1 < time.time():
             lastTimeValueWasUpdated = time.time()
             db["analogInput"]["presentValue"] += 0.1
+            # Notify the stack that this data point was updated so the stack can check for logic
+            # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
+            if CASBACnetStack.BACnetStack_ValueUpdated is not None:
+                CASBACnetStack.BACnetStack_ValueUpdated(db["device"]["instance"], bacnet_objectType["analogValue"], db["analogValue"]["instance"],
+                                                        bacnet_propertyIdentifier["presentValue"])
             print("FYI: Updating AnalogInput (0) PresentValue: ", round(db["analogInput"]["presentValue"], 1))
