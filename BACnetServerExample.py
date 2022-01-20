@@ -96,11 +96,7 @@ db = {
         "FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
         "FdBbmdAddressPort": 47808,
         "FdSubscriptionLifetime": 3000,
-        "changesPending": False},
-    "debug": {
-        "message": "",
-        "messageType": 0
-    }
+        "changesPending": False}
 }
 
 # Globals
