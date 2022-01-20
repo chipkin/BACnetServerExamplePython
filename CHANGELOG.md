@@ -2,6 +2,13 @@
 
 ## Version 0.0.x
 
+### 0.0.4.x (2022-Jan-20)
+
+- Added example of networkPort object
+- Added example of I-Am message
+- Added example of ValueUpdated
+- Added example of LogDebugMessage callback
+
 ### 0.0.3.x (2020-Dec-22)
 
 - Added example of analogInput.reliability, and binaryInput.reliability
