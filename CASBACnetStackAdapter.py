@@ -149,6 +149,9 @@ fpCallbackSetPropertyTime = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_uint32, cty
 fpCallbackSetPropertyUInt = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_uint32, ctypes.c_uint16, ctypes.c_uint32,
                                              ctypes.c_uint32, ctypes.c_uint32, ctypes.c_bool, ctypes.c_uint32,
                                              ctypes.c_uint8, ctypes.POINTER(ctypes.c_uint32))
+
+fpCallbackLogDebugMessage = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_uint8), ctypes.c_uint16, ctypes.c_uint8)
+
 # Client Hooks
 fpHookIAm = ctypes.CFUNCTYPE(None, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint8, ctypes.c_uint16,
                              ctypes.POINTER(ctypes.c_uint8), ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint16,
@@ -486,3 +489,5 @@ casbacnetstack_protocolLevel = {"bacnet-application": 2}
 casbacnetstack_fdBbmdAddressOffset = {"host": 1, "port": 2}
 
 casbacnetstack_network_port_lowest_protocol_level = 4194303
+
+casbacnet_debugMessageType = {"Error": 0, "Info": 1}

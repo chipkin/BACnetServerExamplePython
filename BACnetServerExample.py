@@ -23,88 +23,84 @@ from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callba
 
 db = {
     "device": {
-        "instance": 389001, objectName": "Device Rainbow",vendorname": "Example Chipkin Automation Systems", vendoridentifier": 0},ogInput": {
-    "instance": 0, objectName": "AnalogInput Bronze",presentValue": 99.6, units": 62,reliability": 1}, ryInput
-": {
-"instance": 3, objectName
-": "
-BinaryInput
-Emerald
-",presentValue": 1, reliability
-": 1},iStateInput": {
-    "instance": 13, objectName": "MultiStateInput Hot Pink",presentValue": 3}, ogOutput
-": {
-"instance": 1, objectName
-": "
-AnalogOutput
-Chartreuse
-",presentValue": 1}, ogValue
-": {
-"instance": 2, objectName
-": "
-AnalogValue
-Diamond
-",presentValue": 1}, ryOutput
-": {
-"instance": 4, objectName
-": "
-BinaryOutput
-Fuchsia
-",presentValue": 1}, ryValue
-": {
-"instance": 5, objectName
-": "
-BinaryValue
-Gold
-",presentValue": 1}, iStateOutput
-": {
-"instance": 14, objectName
-": "
-MultiStateOutput
-Indigo
-",presentValue": 1}, iStateValue
-": {
-"instance": 15, objectName
-": "
-MultiStateValue
-Kiwi
-",presentValue": 1}, acterstringValue
-": {
-"instance": 40, objectName
-": "
-CharacterstringValue
-Nickel
-",presentValue": 1}, gerValue
-": {
-"instance": 45, objectName
-": "
-IntegerValue
-Purple
-",presentValue": 1}, eAnalogValue
-": {
-"instance": 46, objectName
-": "
-LargeAnalogValue
-Quartz
-",presentValue": 1}, tiveIntegerValue
-": {
-"instance": 48, objectName
-": "
-PositiveIntegerValue
-Silver
-",presentValue": 1}, orkPort
-": {
-"instance": 50, objectName
-": "
-NetworkPort
-Vermillion
-",BACnetIPUDPPort": 47808, ipLength
-": 4,ipAddress": [192, 168, 1, 199], ipDefaultGateway
-": [192, 168, 1, 99],ipDnsServer": [1, 2, 3, 4, 5], ipNumOfDns
-": 1,ipSubnetMask": [255, 255, 255, 0], FdBbmdAddressHostIp
-": [192, 168, 1, 4],FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
-"FdBbmdAddressPort": 47808, FdSubscriptionLifetime
-": 3000,changesPending": False}
+        "instance": 389001,
+        "objectName": "Device Rainbow",
+        "vendorname": "Example Chipkin Automation Systems",
+        "vendoridentifier": 0},
+    "analogInput": {
+        "instance": 0,
+        "objectName": "AnalogInput Bronze",
+        "presentValue": 99.6,
+        "units": 62,
+        "reliability": 1},
+    "binaryInput": {
+        "instance": 3,
+        "objectName": "BinaryInput Emerald",
+        "presentValue": 1,
+        "reliability": 1},
+    "multiStateInput": {
+        "instance": 13,
+        "objectName": "MultiStateInput Hot Pink",
+        "presentValue": 3},
+    "analogOutput": {
+        "instance": 1,
+        "objectName": "AnalogOutput Chartreuse",
+        "presentValue": 1},
+    "analogValue": {
+        "instance": 2,
+        "objectName": "AnalogValue Diamond",
+        "presentValue": 1},
+    "binaryOutput": {
+        "instance": 4,
+        "objectName": "BinaryOutput Fuchsia",
+        "presentValue": 1},
+    "binaryValue": {
+        "instance": 5,
+        "objectName": "BinaryValue Gold",
+        "presentValue": 1},
+    "multiStateOutput": {
+        "instance": 14,
+        "objectName": "MultiStateOutput Indigo",
+        "presentValue": 1},
+    "multiStateValue": {
+        "instance": 15,
+        "objectName": "MultiStateValue Kiwi",
+        "presentValue": 1},
+    "characterstringValue": {
+        "instance": 40,
+        "objectName": "CharacterstringValue Nickel",
+        "presentValue": 1},
+    "integerValue": {
+        "instance": 45,
+        "objectName": "IntegerValue Purple",
+        "presentValue": 1},
+    "largeAnalogValue": {
+        "instance": 46,
+        "objectName": "LargeAnalogValue Quartz",
+        "presentValue": 1},
+    "positiveIntegerValue": {
+        "instance": 48,
+        "objectName": "PositiveIntegerValue Silver",
+        "presentValue": 1},
+    "networkPort": {
+        "instance": 50,
+        "objectName": "NetworkPort Vermillion",
+        "BACnetIPUDPPort": 47808,
+        "ipLength": 4,
+        "ipAddress": [0, 0, 0, 0],
+        "ipDefaultGateway": [0, 0, 0, 0],
+        "ipDnsServer": [0, 0, 0, 0],
+        "ipNumOfDns": 0,
+        "ipSubnetMask": [0, 0, 0, 0],
+        "FdBbmdAddressHostIp": [192, 168, 1, 4],
+        "FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
+        "FdBbmdAddressPort": 47808,
+        "FdSubscriptionLifetime": 3000,
+        "changesPending": False},
+    "debug": {
+        "message": "",
+        "messageType": 0
+    }
 }
 
 # Globals
@@ -118,12 +114,12 @@ def octetStringCopy(source, destination, length, offset=0):
         destination[i + offset] = source[i]
 
 
-# Rebuilds password string from ctype.c_uint_8 arrray
-def rebuildPassword(passwordPointer, length):
-    password = ""
+# Rebuilds string from ctype.c_uint_8 arrray
+def rebuildString(strPointer, length):
+    rebuiltStr = ""
     for i in range(0, length):
-        password = password + chr(passwordPointer[i])
-    return password
+        rebuiltStr = rebuiltStr + chr(strPointer[i])
+    return rebuiltStr
 
 
 # Callbacks
@@ -443,7 +439,7 @@ def CallbackSetPropertyOctetString(deviceInstance, objectType, objectInstance, p
 
 def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, passwordLength, errorCode):
     # Rebuild password from pointer reference
-    derefedPassword = rebuildPassword(password, passwordLength)
+    derefedPassword = rebuildString(password, passwordLength)
 
     print("CallbackReinitializeDevice", deviceInstance, reinitializedState, derefedPassword, passwordLength, errorCode[0])
 
@@ -500,7 +496,7 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
 
 def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, passwordLength, useTimeDuration, timeDuration, errorCode):
     # Rebuild password from pointer reference
-    derefedPassword = rebuildPassword(password, passwordLength)
+    derefedPassword = rebuildString(password, passwordLength)
 
     print("CallbackDeviceCommunicationControl", deviceInstance, enableDisable, derefedPassword, passwordLength, useTimeDuration, timeDuration,
           errorCode[0])
@@ -528,6 +524,13 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
     # Return true to allow DeviceCommunicationControl logic to continue
     return True
 
+def CallbackLogDebugMessage(message, messageLength, messageType):
+    # Rebuild message from pointer reference
+    derefedMessage = rebuildString(message, messageLength)
+    print("CallbackLogDebugMessage", derefedMessage, messageLength, messageType)
+
+    if derefedMessage != "" and messageLength != 0:
+        print("CAS BACnet Stack DEBUG MESSAGE: ", derefedMessage)
 
 # Main application
 # -----------------------------------------------------------------------------
@@ -616,6 +619,8 @@ if __name__ == "__main__":
     CASBACnetStack.BACnetStack_RegisterCallbackReinitializeDevice(pyCallbackReinitializeDevice)
     pyCallbackDeviceCommunicationControl = fpCallbackDeviceCommunicationControl(CallbackDeviceCommunicationControl)
     CASBACnetStack.BACnetStack_RegisterCallbackDeviceCommunicationControl(pyCallbackDeviceCommunicationControl)
+    pyCallbackLogDebugMessage = fpCallbackLogDebugMessage(CallbackLogDebugMessage)
+    CASBACnetStack.BACnetStack_RegisterCallbackLogDebugMessage(pyCallbackLogDebugMessage)
 
     # 4. Setup the BACnet device
     # ---------------------------------------------------------------------------
