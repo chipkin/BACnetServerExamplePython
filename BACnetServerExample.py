@@ -449,7 +449,8 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     # Before handling the reinitializedState, first check the password.
     # If your device does not require a password, then ignore any password passed in.
     # Otherwise, validate the password.
-    #       If password invalid or incorrect: set errorCode to PasswordInvalid (26)
+    #       If password invalid, missing, or incorrect: set errorCode to PasswordInvalid (26)
+    # In this example, a password of 12345 is required
 
     # Check password before handling reinitialization
     if passwordLength == 0 or derefedPassword != "12345":
@@ -498,16 +499,11 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
     # To handle the password:
     # If your device does not require a password, then ignore any password passed in
     # Otherwise, validate the password
-    #       If password invalid: set errorCode to PasswordInvalid (26)
-    #       If password is required, but no password was provided: set errorCode to MissingRequiredParameter (16)
+    #       If password invalid, missing, or incorrect: set errorCode to PasswordInvalid (26)
     # In this example, a password of 12345 is required
 
     # Check password
-    if derefedPassword == "" or passwordLength == 0:
-        errorCode[0] = bacnet_errorCode["missing-required-parameter"]
-        return False
-    # Require password to be 12345 for the example
-    if derefedPassword != "12345":
+    if passwordLength == 0 or derefedPassword != "12345":
         errorCode[0] = bacnet_errorCode["password-failure"]
         return False
 
