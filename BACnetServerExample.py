@@ -449,16 +449,10 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     # Before handling the reinitializedState, first check the password.
     # If your device does not require a password, then ignore any password passed in.
     # Otherwise, validate the password.
-    #       If password invalid: set errorCode to PasswordInvalid (26)
-    #       If password is required, but no password was provided: set errorCode to MissingRequiredParameter (16)
-    # In this example, a password of 12345 is required
+    #       If password invalid or incorrect: set errorCode to PasswordInvalid (26)
 
     # Check password before handling reinitialization
-    if derefedPassword == "" or passwordLength == 0:
-        errorCode[0] = bacnet_errorCode["missing-required-parameter"]
-        return False
-    # Require password to be 12345 for the example
-    if derefedPassword != "12345":
+    if passwordLength == 0 or derefedPassword != "12345":
         errorCode[0] = bacnet_errorCode["password-failure"]
         return False
 
@@ -531,7 +525,7 @@ def CallbackLogDebugMessage(message, messageLength, messageType):
 # Main application
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("FYI: CAS BACnet Stack Python Server Example v0.0.4")
+    print("FYI: CAS BACnet Stack Python Server Example v0.0.5")
     print("FYI: https://github.com/chipkin/BACnetServerExamplePython")
 
     # 1. Load the CAS BACnet stack functions

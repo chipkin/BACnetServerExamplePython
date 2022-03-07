@@ -2,6 +2,9 @@
 
 ## Version 0.0.x
 
+### 0.0.5.x (2022-Mar-07)
+- Updated error code on missing password for reinitialize device
+
 ### 0.0.4.x (2022-Jan-20)
 
 - Added example of networkPort object
