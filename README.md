@@ -61,11 +61,19 @@ FYI: Updating AnalogInput (0) PresentValue:  100.6
 
 This python script requires the [CAS BACnet Stack](https://www.bacnetstack.com/) DLL that can be purchased from [Chipkin Automation Systems](https://store.chipkin.com).
 
-Place the DLL in the root folder.
+Place the DLL in the root folder. Windows: CASBACnetStack_x64_Release.dll, Linux: libCASBACnetStack_x64_Release.so
 
 ```bash
 pip install pathlib
 pip install dnspython
+pip install netifaces
+```
+
+## Running
+
+```bash
+python BACnetServerExample.py
+
 ```
 
 ## Useful links

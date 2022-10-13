@@ -528,6 +528,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------------
     # Load the shared library into ctypes
     libpath = pathlib.Path().absolute() / libname
+    print("FYI: Libary path: ", libpath)
     CASBACnetStack = ctypes.CDLL(str(libpath), mode=ctypes.RTLD_GLOBAL)
 
     # Print the version information
@@ -603,10 +604,10 @@ if __name__ == "__main__":
     CASBACnetStack.BACnetStack_RegisterCallbackSetPropertyOctetString(pyCallbackSetPropertyOctetString)
     pyCallbackReinitializeDevice = fpCallbackReinitializeDevice(CallbackReinitializeDevice)
     CASBACnetStack.BACnetStack_RegisterCallbackReinitializeDevice(pyCallbackReinitializeDevice)
-    pyCallbackDeviceCommunicationControl = fpCallbackDeviceCommunicationControl(CallbackDeviceCommunicationControl)
-    CASBACnetStack.BACnetStack_RegisterCallbackDeviceCommunicationControl(pyCallbackDeviceCommunicationControl)
-    pyCallbackLogDebugMessage = fpCallbackLogDebugMessage(CallbackLogDebugMessage)
-    CASBACnetStack.BACnetStack_RegisterCallbackLogDebugMessage(pyCallbackLogDebugMessage)
+    # pyCallbackDeviceCommunicationControl = fpCallbackDeviceCommunicationControl(CallbackDeviceCommunicationControl)
+    # CASBACnetStack.BACnetStack_RegisterCallbackDeviceCommunicationControl(pyCallbackDeviceCommunicationControl)
+    # pyCallbackLogDebugMessage = fpCallbackLogDebugMessage(CallbackLogDebugMessage)
+    # CASBACnetStack.BACnetStack_RegisterCallbackLogDebugMessage(pyCallbackLogDebugMessage)
 
     # 4. Setup the BACnet device
     # ---------------------------------------------------------------------------

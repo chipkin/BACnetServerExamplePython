@@ -31,7 +31,7 @@ if platform.system() == "Windows":
         print("Error: Could not detect the platform.architecture", platform.architecture())
 elif platform.system() == "Linux":
     if platform.architecture()[0] == "64bit":
-        libname = "CASBACnetStack_x64_Debug.so"
+        libname = "libCASBACnetStack_x64_Debug.so"
     elif platform.architecture()[0] == "32bit":
         if "armv7" in platform.machine():
             # Raspberry PI 3 or 4. Arm7

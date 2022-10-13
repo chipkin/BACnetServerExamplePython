@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 CASBACnetStack_x64_Debug.dll
+
+CASBACnetStack_x64_Release.dll
