@@ -230,6 +230,10 @@ fpHookPropertyUInt = ctypes.CFUNCTYPE(None, ctypes.c_uint32, ctypes.c_uint8, cty
                                       ctypes.POINTER(ctypes.c_uint8), ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint16,
                                       ctypes.POINTER(ctypes.c_uint8), ctypes.c_uint8)
 
+# Constants
+# ---------------------------------------------------------------------------
+MAX_BACNET_PRIORITY = 16
+
 # Enumerations
 # ---------------------------------------------------------------------------
 
