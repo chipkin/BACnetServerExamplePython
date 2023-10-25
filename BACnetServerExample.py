@@ -45,7 +45,9 @@ db = {
     "analogOutput": {
         "instance": 1,
         "objectName": "AnalogOutput Chartreuse",
-        "presentValue": 1},
+        "presentValue": 1,
+        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
+        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
     "analogValue": {
         "instance": 2,
         "objectName": "AnalogValue Diamond",
@@ -53,7 +55,9 @@ db = {
     "binaryOutput": {
         "instance": 4,
         "objectName": "BinaryOutput Fuchsia",
-        "presentValue": 1},
+        "presentValue": 1,
+        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
+        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
     "binaryValue": {
         "instance": 5,
         "objectName": "BinaryValue Gold",
@@ -61,7 +65,9 @@ db = {
     "multiStateOutput": {
         "instance": 14,
         "objectName": "MultiStateOutput Indigo",
-        "presentValue": 1},
+        "presentValue": 1,
+        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
+        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
     "multiStateValue": {
         "instance": 15,
         "objectName": "MultiStateValue Kiwi",
@@ -69,7 +75,7 @@ db = {
     "characterstringValue": {
         "instance": 40,
         "objectName": "CharacterstringValue Nickel",
-        "presentValue": 1},
+        "presentValue": "hello world"},
     "integerValue": {
         "instance": 45,
         "objectName": "IntegerValue Purple",
@@ -127,7 +133,7 @@ def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, 
         # if not data:
         #     print("DEBUG: not data")
         # A message was received.
-        # print ("DEBUG: CallbackReceiveMessage. Message Received", addr, data, len(data) )
+        print ("DEBUG: CallbackReceiveMessage. Message Received", addr, data, len(data) )
 
         # Convert the received address to the CAS BACnet Stack connection string format.
         ip_as_bytes = bytes(map(int, addr[0].split(".")))
@@ -195,6 +201,16 @@ def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, property
             if objectType == bacnet_objectType["analogInput"] and objectInstance == db["analogInput"]["instance"]:
                 value[0] = ctypes.c_float(db["analogInput"]["presentValue"])
                 return True
+            elif objectType == bacnet_objectType["analogValue"] and objectInstance == db["analogValue"]["instance"]:
+                value[0] = ctypes.c_float(db["analogValue"]["presentValue"])
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
+            if objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
+                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                    value[0] = db["analogOutput"]["priorityArray"][propertyArrayIndex - 1]
+                    return True
+                else:
+                    return False
 
     # Return false. The CAS BACnet Stack will use a default value.
     return False
@@ -225,8 +241,44 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
                 # Define how long the Object name is
                 valueElementCount[0] = len(b_objectName)
                 return True
+            elif objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
+                objectName = db["analogOutput"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["analogValue"] and objectInstance == db["analogValue"]["instance"]:
+                objectName = db["analogValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
             elif objectType == bacnet_objectType["binaryInput"] and objectInstance == db["binaryInput"]["instance"]:
                 objectName = db["binaryInput"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
+                objectName = db["binaryOutput"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["binaryValue"] and objectInstance == db["binaryValue"]["instance"]:
+                objectName = db["binaryValue"]["objectName"]
                 # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
                 b_objectName = objectName.encode("utf-8")
                 for i in range(len(b_objectName)):
@@ -244,6 +296,66 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
                 # Define how long the Object name is
                 valueElementCount[0] = len(b_objectName)
                 return True
+            elif objectType == bacnet_objectType["multiStateOutput"] \
+                    and objectInstance == db["multiStateOutput"]["instance"]:
+                objectName = db["multiStateOutput"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["multiStateValue"] \
+                    and objectInstance == db["multiStateValue"]["instance"]:
+                objectName = db["multiStateValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["characterstringValue"] \
+                    and objectInstance == db["characterstringValue"]["instance"]:
+                objectName = db["characterstringValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["integerValue"] \
+                    and objectInstance == db["integerValue"]["instance"]:
+                objectName = db["integerValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["largeAnalogValue"] \
+                    and objectInstance == db["largeAnalogValue"]["instance"]:
+                objectName = db["largeAnalogValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
+            elif objectType == bacnet_objectType["positiveIntegerValue"] \
+                    and objectInstance == db["positiveIntegerValue"]["instance"]:
+                objectName = db["positiveIntegerValue"]["objectName"]
+                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
+                b_objectName = objectName.encode("utf-8")
+                for i in range(len(b_objectName)):
+                    value[i] = b_objectName[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_objectName)
+                return True
             elif objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
                 objectName = db["networkPort"]["objectName"]
                 # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
@@ -253,6 +365,98 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
                 # Define how long the Object Name  is
                 valueElementCount[0] = len(b_objectName)
                 return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
+            if objectType == bacnet_objectType["characterstringValue"] and objectInstance == db["characterstringValue"]["instance"]:
+                presentValue = db["characterstringValue"]["presentValue"]
+                # Convert the Present Value from a string to a format that CAS BACnet Stack can process.
+                b_presentValue = presentValue.encode("utf-8")
+                for i in range(len(b_presentValue)):
+                    value[i] = b_presentValue[i]
+                # Define how long the Object name is
+                valueElementCount[0] = len(b_presentValue)
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["statetext"]:
+            if objectType == bacnet_objectType["multiStateInput"] \
+                    and objectInstance == db["multiStateInput"]["instance"]:
+                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 4:
+                    match propertyArrayIndex:
+                        case 1:
+                            b_stateText = "One".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 2:
+                            b_stateText = "Two".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 3:
+                            b_stateText = "Three".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 4:
+                            b_stateText = "Four".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case _:
+                            return False
+            elif objectType == bacnet_objectType["multiStateOutput"] \
+                    and objectInstance == db["multiStateOutput"]["instance"]:
+                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 2:
+                    match propertyArrayIndex:
+                        case 1:
+                            b_stateText = "One".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 2:
+                            b_stateText = "Two".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case _:
+                            return False
+            elif objectType == bacnet_objectType["multiStateValue"] \
+                    and objectInstance == db["multiStateValue"]["instance"]:
+                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 3:
+                    match propertyArrayIndex:
+                        case 1:
+                            b_stateText = "One".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 2:
+                            b_stateText = "Two".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case 3:
+                            b_stateText = "Three".encode("utf-8")
+                            for i in range(len(b_stateText)):
+                                value[i] = b_stateText[i]
+                            # Define how long the Object name is
+                            valueElementCount[0] = len(b_stateText)
+                            return True
+                        case _:
+                            return False
 
     # Return false. The CAS BACnet Stack will use a default value.
     return False
@@ -274,6 +478,16 @@ def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, pr
             if objectType == bacnet_objectType["binaryInput"] and objectInstance == db["binaryInput"]["instance"]:
                 value[0] = ctypes.c_uint32(db["binaryInput"]["presentValue"])
                 return True
+            elif objectType == bacnet_objectType["binaryValue"] and objectInstance == db["binaryValue"]["instance"]:
+                value[0] = ctypes.c_uint32(db["binaryValue"]["presentValue"])
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
+            if objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
+                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                    value[0] = db["binaryOutput"]["priorityArray"][propertyArrayIndex - 1]
+                    return True
+                else:
+                    return False
         elif propertyIdentifier == bacnet_propertyIdentifier["units"]:
             if ValueToKey(bacnet_objectType, objectType) in db:
                 if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
@@ -311,6 +525,27 @@ def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, property
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
                 value[0] = db["networkPort"]["changesPending"]
                 return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
+            if useArrayIndex:
+                if objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
+                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                        value[0] = db["analogOutput"]["nullArray"][propertyArrayIndex - 1]
+                        return True
+                    else:
+                        return False
+                elif objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
+                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                        value[0] = db["binaryOutput"]["nullArray"][propertyArrayIndex - 1]
+                        return True
+                    else:
+                        return False
+                elif objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"]:
+                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                        value[0] = db["multiStateOutput"]["nullArray"][propertyArrayIndex - 1]
+                        return True
+                    else:
+                        return False
+                    
     return False
 
 
@@ -322,6 +557,11 @@ def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, property
 
 def CallbackGetPropertyDouble(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     print("CallbackGetPropertyDouble", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if deviceInstance == db["device"]["instance"]:
+        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
+            if objectType == bacnet_objectType["largeAnalogValue"] and objectInstance == db["largeAnalogValue"]["instance"]:
+                value[0] = ctypes.c_double(db["largeAnalogValue"]["presentValue"])
+                return True
     return False
 
 
@@ -360,6 +600,11 @@ def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, p
 
 def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     print("CallbackGetPropertyInt", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if deviceInstance == db["device"]["instance"]:
+        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
+            if objectType == bacnet_objectType["integerValue"] and objectInstance == db["integerValue"]["instance"]:
+                value[0] = ctypes.c_int32(db["integerValue"]["presentValue"])
+                return True
     return False
 
 
@@ -394,6 +639,46 @@ def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, property
         elif propertyIdentifier == bacnet_propertyIdentifier["fdsubscriptionlifetime"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
                 value[0] = db["networkPort"]["FdSubscriptionLifetime"]
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
+            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"]:
+                value[0] = ctypes.c_uint32(db["multiStateInput"]["presentValue"])
+                return True
+            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"]:
+                value[0] = ctypes.c_uint32(db["multiStateValue"]["presentValue"])
+                return True
+            elif objectType == bacnet_objectType["positiveIntegerValue"] and objectInstance == db["positiveIntegerValue"]["instance"]:
+                value[0] = ctypes.c_uint32(db["positiveIntegerValue"]["presentValue"])
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
+            if objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"]:
+                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
+                    value[0] = db["multiStateOutput"]["priorityArray"][propertyArrayIndex - 1]
+                    return True
+                else:
+                    return False
+        elif propertyIdentifier == bacnet_propertyIdentifier["numberofstates"]:
+            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"]:
+                value[0] = 4
+                return True
+            elif objectType == bacnet_objectType["multistateOutput"] and objectInstance == db["multistateOutput"]["instance"]:
+                value[0] = 2
+                return True
+            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"]:
+                value[0] = 3
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["statetext"]:
+            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"] \
+                and useArrayIndex and propertyArrayIndex == 0:
+                value[0] = 4
+                return True
+            elif objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"] \
+                and useArrayIndex and propertyArrayIndex == 0:
+                value[0] = 2
+                return True
+            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"] \
+                and useArrayIndex and propertyArrayIndex == 0:
+                value[0] = 3
                 return True
     return False
 
@@ -521,7 +806,7 @@ def CallbackLogDebugMessage(message, messageLength, messageType):
 # Main application
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("FYI: CAS BACnet Stack Python Server Example v0.0.5")
+    print("FYI: CAS BACnet Stack Python Server Example v0.0.7")
     print("FYI: https://github.com/chipkin/BACnetServerExamplePython")
 
     # 1. Load the CAS BACnet stack functions
@@ -652,6 +937,9 @@ if __name__ == "__main__":
         print("Error: Failed to add MultiStateInput")
         exit()
 
+    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateInput"], db["multiStateInput"]["instance"],
+                                                  bacnet_propertyIdentifier["statetext"], True)
+
     # analogOutput
     print(f"FYI: Adding analogOutput. analogOutput.instance=[{db['analogOutput']['instance']:.0f}]")
     if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogOutput"], db["analogOutput"]["instance"]):
@@ -682,11 +970,17 @@ if __name__ == "__main__":
         print("Error: Failed to add multiStateOutput")
         exit()
 
+    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateOutput"], db["multiStateOutput"]["instance"],
+                                                  bacnet_propertyIdentifier["statetext"], True)
+
     # multiStateValue
-    print(f"FYI: Adding multiStateOutput. multiStateValue.instance=[{db['multiStateValue']['instance']:.0f}]")
+    print(f"FYI: Adding multiStateValue. multiStateValue.instance=[{db['multiStateValue']['instance']:.0f}]")
     if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateValue"], db["multiStateValue"]["instance"]):
         print("Error: Failed to add multiStateValue")
         exit()
+
+    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateValue"], db["multiStateValue"]["instance"],
+                                                  bacnet_propertyIdentifier["statetext"], True)
 
     # characterstringValue
     print(f"FYI: Adding characterstringValue. characterstringValue.instance="
