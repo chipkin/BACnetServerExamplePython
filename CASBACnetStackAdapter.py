@@ -24,20 +24,20 @@ casbacnetstack_adapter_version = "0.0.4"  # For CASBACnetStack version 3.25.0 or
 
 if platform.system() == "Windows":
     if platform.architecture()[0] == '64bit':
-        libname = "CASBACnetStack_x64_Debug.dll"
+        libname = "CASBACnetStack_x64_Release.dll"
     elif platform.architecture()[0] == "32bit":
-        libname = "CASBACnetStack_x86_Debug.dll"
+        libname = "CASBACnetStack_x86_Release.dll"
     else:
         print("Error: Could not detect the platform.architecture", platform.architecture())
 elif platform.system() == "Linux":
     if platform.architecture()[0] == "64bit":
-        libname = "libCASBACnetStack_x64_Debug.so"
+        libname = "libCASBACnetStack_x64_Release.so"
     elif platform.architecture()[0] == "32bit":
         if "armv7" in platform.machine():
             # Raspberry PI 3 or 4. Arm7
             libname = "libCASBACnetStack_arm7_Release.so"
         else:
-            libname = "CASBACnetStack_x86_Debug.so"
+            libname = "CASBACnetStack_x86_Release.so"
     else:
         print("Error: Could not detect the platform.architecture", platform.architecture())
 else:
@@ -494,4 +494,4 @@ casbacnetstack_fdBbmdAddressOffset = {"host": 1, "port": 2}
 
 casbacnetstack_network_port_lowest_protocol_level = 4194303
 
-casbacnet_debugMessageType = {"Error": 0, "Info": 1}
+casbacnet_ReleaseMessageType = {"Error": 0, "Info": 1}
