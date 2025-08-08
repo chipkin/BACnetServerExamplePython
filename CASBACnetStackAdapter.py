@@ -24,20 +24,20 @@ casbacnetstack_adapter_version = "0.0.4"  # For CASBACnetStack version 3.25.0 or
 
 if platform.system() == "Windows":
     if platform.architecture()[0] == '64bit':
-        libname = "CASBACnetStack_x64_Debug.dll"
+        libname = "CASBACnetStack_x64_Release.dll"
     elif platform.architecture()[0] == "32bit":
-        libname = "CASBACnetStack_x86_Debug.dll"
+        libname = "CASBACnetStack_x86_Release.dll"
     else:
         print("Error: Could not detect the platform.architecture", platform.architecture())
 elif platform.system() == "Linux":
     if platform.architecture()[0] == "64bit":
-        libname = "libCASBACnetStack_x64_Debug.so"
+        libname = "libCASBACnetStack_x64_Release.so"
     elif platform.architecture()[0] == "32bit":
         if "armv7" in platform.machine():
             # Raspberry PI 3 or 4. Arm7
             libname = "libCASBACnetStack_arm7_Release.so"
         else:
-            libname = "CASBACnetStack_x86_Debug.so"
+            libname = "CASBACnetStack_x86_Release.so"
     else:
         print("Error: Could not detect the platform.architecture", platform.architecture())
 else:
@@ -351,7 +351,7 @@ bacnet_propertyIdentifier = {"absenteelimit": 244, "acceptedmodes": 175, "access
                              "optional": 80, "outofservice": 81, "outputunits": 82, "packetreordertime": 333,
                              "passbackmode": 300, "passbacktimeout": 301, "passengeralarm": 478, "polarity": 84,
                              "portfilter": 363, "positiveaccessrules": 302, "power": 384, "powermode": 479,
-                             "prescale": 185, "presentValue": 85, "priority": 86, "priorityarray": 87,
+                             "prescale": 185, "presentvalue": 85, "priority": 86, "priorityarray": 87,
                              "priorityforwriting": 88, "processidentifier": 89, "processidentifierfilter": 361,
                              "profilelocation": 485, "profilename": 168, "programchange": 90, "programlocation": 91,
                              "programstate": 92, "propertylist": 371, "proportionalconstant": 93,
@@ -494,4 +494,4 @@ casbacnetstack_fdBbmdAddressOffset = {"host": 1, "port": 2}
 
 casbacnetstack_network_port_lowest_protocol_level = 4194303
 
-casbacnet_debugMessageType = {"Error": 0, "Info": 1}
+casbacnet_ReleaseMessageType = {"Error": 0, "Info": 1}
