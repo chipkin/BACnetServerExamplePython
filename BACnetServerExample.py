@@ -12,6 +12,9 @@ import socket
 import time  # Sleep function
 from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callback prototypes
 
+import BACnetServerExampleDatabase as db_module
+BACnetDatabase = db_module.ExampleDatabase()
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -20,101 +23,66 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+
 # Example database
 # -----------------------------------------------------------------------------
-# This is an example database. Normally this data would come from your sensor/database
-#
-# Units.
-# no_units (95),celsius (62)
-# ...
-#
-# Reliability
-# no-fault-detected (0),or (1)
-# ...
+# This is an example database. Normally this data would come from your 
+# sensor/database
 
-db = {
-    "device": {
-        "instance": 389001,
-        "objectName": "Device Rainbow",
-        "vendorname": "Example Chipkin Automation Systems",
-        "vendoridentifier": 0},
-    "analogInput": {
-        "instance": 0,
-        "objectName": "AnalogInput Bronze",
-        "presentValue": 99.6,
-        "units": 62,
-        "reliability": 1},
-    "binaryInput": {
-        "instance": 3,
-        "objectName": "BinaryInput Emerald",
-        "presentValue": 1,
-        "reliability": 1},
-    "multiStateInput": {
-        "instance": 13,
-        "objectName": "MultiStateInput Hot Pink",
-        "presentValue": 3},
-    "analogOutput": {
-        "instance": 1,
-        "objectName": "AnalogOutput Chartreuse",
-        "presentValue": 1,
-        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
-        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-    "analogValue": {
-        "instance": 2,
-        "objectName": "AnalogValue Diamond",
-        "presentValue": 1},
-    "binaryOutput": {
-        "instance": 4,
-        "objectName": "BinaryOutput Fuchsia",
-        "presentValue": 1,
-        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
-        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-    "binaryValue": {
-        "instance": 5,
-        "objectName": "BinaryValue Gold",
-        "presentValue": 1},
-    "multiStateOutput": {
-        "instance": 14,
-        "objectName": "MultiStateOutput Indigo",
-        "presentValue": 1,
-        "nullArray": [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
-        "priorityArray": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-    "multiStateValue": {
-        "instance": 15,
-        "objectName": "MultiStateValue Kiwi",
-        "presentValue": 1},
-    "characterstringValue": {
-        "instance": 40,
-        "objectName": "CharacterstringValue Nickel",
-        "presentValue": "hello world"},
-    "integerValue": {
-        "instance": 45,
-        "objectName": "IntegerValue Purple",
-        "presentValue": 1},
-    "largeAnalogValue": {
-        "instance": 46,
-        "objectName": "LargeAnalogValue Quartz",
-        "presentValue": 1},
-    "positiveIntegerValue": {
-        "instance": 48,
-        "objectName": "PositiveIntegerValue Silver",
-        "presentValue": 1},
-    "networkPort": {
-        "instance": 50,
-        "objectName": "NetworkPort Vermillion",
-        "BACnetIPUDPPort": 47808,
-        "ipLength": 4,
-        "ipAddress": [0, 0, 0, 0],
-        "ipDefaultGateway": [0, 0, 0, 0],
-        "ipDnsServer": [0, 0, 0, 0],
-        "ipNumOfDns": 0,
-        "ipSubnetMask": [0, 0, 0, 0],
-        "FdBbmdAddressHostIp": [192, 168, 1, 4],
-        "FdBbmdAddressHostType": 1,  # 0 = None, 1 = IpAddress, 2 = Name
-        "FdBbmdAddressPort": 47808,
-        "FdSubscriptionLifetime": 3000,
-        "changesPending": False}
-}
+DEVICE_INSTANCE = 389001
+ANALOG_INPUT_BRONZE_INSTANCE = 0
+ANALOG_OUTPUT_CHARTREUSE_INSTANCE = 1
+ANALOG_VALUE_DIAMOND_INSTANCE = 2
+BINARY_INPUT_EMERALD_INSTANCE = 3
+BINARY_OUTPUT_FUCHSIA_INSTANCE = 4
+BINARY_VALUE_GOLD_INSTANCE = 5
+MULTISTATE_INPUT_HOTPINK_INSTANCE = 13
+MULTISTATE_OUTPUT_INDIGO_INSTANCE = 14
+MULTISTATE_VALUE_KIWI_INSTANCE = 15
+CHARACTERSTRING_VALUE_NICKEL_INSTANCE = 40
+INTEGER_VALUE_PURPLE_INSTANCE = 45
+LARGE_ANALOG_VALUE_QUARTZ_INSTANCE = 46
+POSITIVE_INTEGER_VALUE_SILVER_INSTANCE = 48
+NETWORK_PORT_VERMILLION_INSTANCE = 56
+MAX_BACNET_PRIORITY = 16
+
+
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["objectname"], "Device Rainbow")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["vendorname"], "Example Chipkin Automation Systems")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["vendoridentifier"], 0)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogInput Bronze")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 99.6)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["units"], bacnet_engineeringUnits["degreescelsius"])
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["reliability"], bacnet_reliability["no-fault-detected"])
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryInput Emerald")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["reliability"], bacnet_reliability["no-fault-detected"])
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"], MULTISTATE_INPUT_HOTPINK_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateInput Hot Pink")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"], MULTISTATE_INPUT_HOTPINK_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 3)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"], ANALOG_OUTPUT_CHARTREUSE_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogOutput Chartreuse")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"], ANALOG_OUTPUT_CHARTREUSE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_VALUE_DIAMOND_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogValue Diamond")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_VALUE_DIAMOND_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"], BINARY_OUTPUT_FUCHSIA_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryOutput Fuchsia")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"], BINARY_OUTPUT_FUCHSIA_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"], BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryValue Gold")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"], BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"], MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateOutput Indigo")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"], MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"], MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateValue Kiwi")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"], MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"], CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["objectname"], "CharacterstringValue Nickel")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"], CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["presentvalue"], "hello world")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"], INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["objectname"], "IntegerValue Purple")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"], INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"], LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["objectname"], "LargeAnalogValue Quartz")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"], LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"], POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["objectname"], "PositiveIntegerValue Silver")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"], POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["objectname"], "NetworkPort Vermillion")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"], 47808)
+
 
 # Globals
 # -----------------------------------------------------------------------------
@@ -183,7 +151,8 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
         # Use broadcast IP address
         # ToDo: Get the subnet mask and apply it to the IP address
         logger.debug("ToDo: Broadcast this message. Local IP: %s Subnet: %s Broadcast IP: ????", 
-                     db["networkPort"]["ipAddress"], db["networkPort"]["ipSubnetMask"])
+                     BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"]),
+                     BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"]))
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
                     f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
     else:
@@ -207,271 +176,28 @@ def CallbackGetSystemTime():
 def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyReal %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
 
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["analogInput"] and objectInstance == db["analogInput"]["instance"]:
-                value[0] = ctypes.c_float(db["analogInput"]["presentValue"])
-                return True
-            elif objectType == bacnet_objectType["analogValue"] and objectInstance == db["analogValue"]["instance"]:
-                value[0] = ctypes.c_float(db["analogValue"]["presentValue"])
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
-            if objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
-                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                    value[0] = db["analogOutput"]["priorityArray"][propertyArrayIndex - 1]
-                    return True
-                else:
-                    return False
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        logger.debug("Value not found in database")
+        return False
 
-    # Return false. The CAS BACnet Stack will use a default value.
-    return False
-
+    value[0] = ctypes.c_float(float(raw_value))
+    return True
 
 def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                   encodingType, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyCharString %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex,
           propertyArrayIndex)
 
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["vendorname"] and objectType == bacnet_objectType["device"]:
-            vendorname = db["device"]["vendorname"]
-            # Convert the vendorname from a string to a format that CAS BACnet Stack can process.
-            b_vendorname = vendorname.encode("utf-8")
-            for i in range(len(b_vendorname)):
-                value[i] = b_vendorname[i]
-            # Define how long the vendorname is
-            valueElementCount[0] = len(b_vendorname)
-            return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["objectname"]:
-            if objectType == bacnet_objectType["analogInput"] and objectInstance == db["analogInput"]["instance"]:
-                objectName = db["analogInput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
-                objectName = db["analogOutput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["analogValue"] and objectInstance == db["analogValue"]["instance"]:
-                objectName = db["analogValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["binaryInput"] and objectInstance == db["binaryInput"]["instance"]:
-                objectName = db["binaryInput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
-                objectName = db["binaryOutput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["binaryValue"] and objectInstance == db["binaryValue"]["instance"]:
-                objectName = db["binaryValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["multiStateInput"] \
-                    and objectInstance == db["multiStateInput"]["instance"]:
-                objectName = db["multiStateInput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["multiStateOutput"] \
-                    and objectInstance == db["multiStateOutput"]["instance"]:
-                objectName = db["multiStateOutput"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["multiStateValue"] \
-                    and objectInstance == db["multiStateValue"]["instance"]:
-                objectName = db["multiStateValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["characterstringValue"] \
-                    and objectInstance == db["characterstringValue"]["instance"]:
-                objectName = db["characterstringValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["integerValue"] \
-                    and objectInstance == db["integerValue"]["instance"]:
-                objectName = db["integerValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["largeAnalogValue"] \
-                    and objectInstance == db["largeAnalogValue"]["instance"]:
-                objectName = db["largeAnalogValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["positiveIntegerValue"] \
-                    and objectInstance == db["positiveIntegerValue"]["instance"]:
-                objectName = db["positiveIntegerValue"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_objectName)
-                return True
-            elif objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                objectName = db["networkPort"]["objectName"]
-                # Convert the Object Name from a string to a format that CAS BACnet Stack can process.
-                b_objectName = objectName.encode("utf-8")
-                for i in range(len(b_objectName)):
-                    value[i] = b_objectName[i]
-                # Define how long the Object Name  is
-                valueElementCount[0] = len(b_objectName)
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["characterstringValue"] and objectInstance == db["characterstringValue"]["instance"]:
-                presentValue = db["characterstringValue"]["presentValue"]
-                # Convert the Present Value from a string to a format that CAS BACnet Stack can process.
-                b_presentValue = presentValue.encode("utf-8")
-                for i in range(len(b_presentValue)):
-                    value[i] = b_presentValue[i]
-                # Define how long the Object name is
-                valueElementCount[0] = len(b_presentValue)
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["statetext"]:
-            if objectType == bacnet_objectType["multiStateInput"] \
-                    and objectInstance == db["multiStateInput"]["instance"]:
-                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 4:
-                    match propertyArrayIndex:
-                        case 1:
-                            b_stateText = "One".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 2:
-                            b_stateText = "Two".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 3:
-                            b_stateText = "Three".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 4:
-                            b_stateText = "Four".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case _:
-                            return False
-            elif objectType == bacnet_objectType["multiStateOutput"] \
-                    and objectInstance == db["multiStateOutput"]["instance"]:
-                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 2:
-                    match propertyArrayIndex:
-                        case 1:
-                            b_stateText = "One".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 2:
-                            b_stateText = "Two".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case _:
-                            return False
-            elif objectType == bacnet_objectType["multiStateValue"] \
-                    and objectInstance == db["multiStateValue"]["instance"]:
-                if useArrayIndex and propertyArrayIndex > 0 and propertyArrayIndex <= 3:
-                    match propertyArrayIndex:
-                        case 1:
-                            b_stateText = "One".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 2:
-                            b_stateText = "Two".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case 3:
-                            b_stateText = "Three".encode("utf-8")
-                            for i in range(len(b_stateText)):
-                                value[i] = b_stateText[i]
-                            # Define how long the Object name is
-                            valueElementCount[0] = len(b_stateText)
-                            return True
-                        case _:
-                            return False
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
 
-    # Return false. The CAS BACnet Stack will use a default value.
-    return False
-
+    raw_value_encoded = raw_value.encode("utf-8")
+    for i in range(len(raw_value_encoded)):
+        value[i] = raw_value_encoded[i]
+    valueElementCount[0] = len(raw_value_encoded)
+    return True
 
 def ValueToKey(enumeration, searchValue):
     # https://www.geeksforgeeks.org/python-get-key-from-value-in-dictionary/
@@ -483,44 +209,13 @@ def ValueToKey(enumeration, searchValue):
 
 def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyEnumerated %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, propertyArrayIndex)
+    
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
 
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["binaryInput"] and objectInstance == db["binaryInput"]["instance"]:
-                value[0] = ctypes.c_uint32(db["binaryInput"]["presentValue"])
-                return True
-            elif objectType == bacnet_objectType["binaryValue"] and objectInstance == db["binaryValue"]["instance"]:
-                value[0] = ctypes.c_uint32(db["binaryValue"]["presentValue"])
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
-            if objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
-                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                    value[0] = db["binaryOutput"]["priorityArray"][propertyArrayIndex - 1]
-                    return True
-                else:
-                    return False
-        elif propertyIdentifier == bacnet_propertyIdentifier["units"]:
-            if ValueToKey(bacnet_objectType, objectType) in db:
-                if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
-                    value[0] = ctypes.c_uint32(db[ValueToKey(bacnet_objectType, objectType)]["units"])
-                    return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["reliability"]:
-            if ValueToKey(bacnet_objectType, objectType) in db:
-                if "units" in db[ValueToKey(bacnet_objectType, objectType)]:
-                    value[0] = ctypes.c_uint32(db[ValueToKey(bacnet_objectType, objectType)]["reliability"])
-                    return True
-
-            # Undefined reliability. Assume no-fault-detected (0)
-            value[0] = ctypes.c_uint32(0)
-            return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                value[0] = db["networkPort"]["FdBbmdAddressHostType"]
-                return True
-
-    # Return false. The CAS BACnet Stack will use a default value.
-    return False
-
+    value[0] = ctypes.c_uint32(int(raw_value))
+    return True
 
 def CallbackGetPropertyBitString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                  useArrayIndex, propertyArrayIndex):
@@ -531,34 +226,13 @@ def CallbackGetPropertyBitString(deviceInstance, objectType, objectInstance, pro
 
 def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyBool %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["changespending"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                value[0] = db["networkPort"]["changesPending"]
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
-            if useArrayIndex:
-                if objectType == bacnet_objectType["analogOutput"] and objectInstance == db["analogOutput"]["instance"]:
-                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                        value[0] = db["analogOutput"]["nullArray"][propertyArrayIndex - 1]
-                        return True
-                    else:
-                        return False
-                elif objectType == bacnet_objectType["binaryOutput"] and objectInstance == db["binaryOutput"]["instance"]:
-                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                        value[0] = db["binaryOutput"]["nullArray"][propertyArrayIndex - 1]
-                        return True
-                    else:
-                        return False
-                elif objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"]:
-                    if propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                        value[0] = db["multiStateOutput"]["nullArray"][propertyArrayIndex - 1]
-                        return True
-                    else:
-                        return False
-                    
-    return False
+   
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
 
+    value[0] = bool(raw_value)
+    return True
 
 def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, propertyIdentifier, year, month, day, weekday, useArrayIndex,
                             propertyArrayIndex):
@@ -568,55 +242,67 @@ def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, property
 
 def CallbackGetPropertyDouble(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyDouble %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["largeAnalogValue"] and objectInstance == db["largeAnalogValue"]["instance"]:
-                value[0] = ctypes.c_double(db["largeAnalogValue"]["presentValue"])
-                return True
-    return False
+        
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
 
+    value[0] = ctypes.c_double(float(raw_value))
+    return True
 
 def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                    useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyOctetString %s %s %s %s %s %s", deviceInstance, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex, propertyArrayIndex)
-    if propertyIdentifier == bacnet_propertyIdentifier["ipaddress"]:
-        if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipLength"]
-            octetStringCopy(db["networkPort"]["ipAddress"], value, valueElementCount[0])
-            logger.debug("IN GET IP: output = %s.%s.%s.%s", value[0], value[1], value[2], value[3])
-            return True
-    elif propertyIdentifier == bacnet_propertyIdentifier["ipdefaultgateway"]:
-        if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipLength"]
-            octetStringCopy(db["networkPort"]["ipDefaultGateway"], value, valueElementCount[0])
-            return True
-    elif propertyIdentifier == bacnet_propertyIdentifier["ipsubnetmask"]:
-        if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipLength"]
-            octetStringCopy(db["networkPort"]["ipSubnetMask"], value, valueElementCount[0])
-            return True
-    elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
-        if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipNumOfDns"] * 4
-            for i in range(db["networkPort"]["ipNumOfDns"]):
-                octetStringCopy(db["networkPort"]["ipDnsServer"][i], value, 4, i * 4)
-            return True
-    elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-        if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-            valueElementCount[0] = db["networkPort"]["ipLength"]
-            octetStringCopy(db["networkPort"]["FdBbmdAddressHostIp"], value, valueElementCount[0])
-            return True
+    if objectType == bacnet_objectType["networkPort"] and objectInstance == NETWORK_PORT_VERMILLION_INSTANCE:
+        if propertyIdentifier == bacnet_propertyIdentifier["ipaddress"]:
+            ip_addr = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipAddress")
+            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            if ip_addr is not None and ip_length is not None:
+                valueElementCount[0] = int(ip_length)
+                octetStringCopy(ip_addr, value, int(ip_length))
+                logger.debug("IN GET IP: output = %s.%s.%s.%s", value[0], value[1], value[2], value[3])
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["ipdefaultgateway"]:
+            ip_default_gateway = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipDefaultGateway")
+            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            if ip_default_gateway is not None and ip_length is not None:
+                valueElementCount[0] = int(ip_length)
+                octetStringCopy(ip_default_gateway, value, int(ip_length))
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["ipsubnetmask"]:
+            ip_subnet_mask = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipSubnetMask")
+            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            if ip_subnet_mask is not None and ip_length is not None:
+                valueElementCount[0] = int(ip_length)
+                octetStringCopy(ip_subnet_mask, value, int(ip_length))
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
+            ip_dns_server = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipDnsServer")
+            ip_num_of_dns = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipNumOfDns")
+            if ip_dns_server is not None and ip_num_of_dns is not None:
+                valueElementCount[0] = int(ip_num_of_dns) * 4
+                for i in range(int(ip_num_of_dns)):
+                    octetStringCopy(ip_dns_server[i], value, 4, i * 4)
+                return True
+        elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
+            fdbbmd_address_host_ip = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp")
+            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            if fdbbmd_address_host_ip is not None and ip_length is not None:
+                valueElementCount[0] = int(ip_length)
+                octetStringCopy(fdbbmd_address_host_ip, value, int(ip_length))
+                return True
     return False
 
 
 def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyInt %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["integerValue"] and objectInstance == db["integerValue"]["instance"]:
-                value[0] = ctypes.c_int32(db["integerValue"]["presentValue"])
-                return True
-    return False
+    
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
+
+    value[0] = ctypes.c_int32(int(raw_value))
+    return True
 
 
 def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, propertyIdentifier, hour, minute, second, hundrethSeconds, useArrayIndex,
@@ -627,104 +313,32 @@ def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, property
 
 def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyUInt %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["vendoridentifier"]:
-            if objectType == bacnet_objectType["device"]:
-                value[0] = ctypes.c_uint32(db["device"]["vendoridentifier"])
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["bacnetipudpport"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                value[0] = db["networkPort"]["BACnetIPUDPPort"]
-                return True
-        # Network Port Object IP DNS Server Array Size property
-        elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                if useArrayIndex and propertyArrayIndex == 0:
-                    value[0] = db["networkPort"]["ipNumOfDns"]
-                    return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                if useArrayIndex and propertyArrayIndex == casbacnetstack_fdBbmdAddressOffset["port"]:
-                    value[0] = db["networkPort"]["FdBbmdAddressPort"]
-                    return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["fdsubscriptionlifetime"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                value[0] = db["networkPort"]["FdSubscriptionLifetime"]
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["presentValue"]:
-            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"]:
-                value[0] = ctypes.c_uint32(db["multiStateInput"]["presentValue"])
-                return True
-            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"]:
-                value[0] = ctypes.c_uint32(db["multiStateValue"]["presentValue"])
-                return True
-            elif objectType == bacnet_objectType["positiveIntegerValue"] and objectInstance == db["positiveIntegerValue"]["instance"]:
-                value[0] = ctypes.c_uint32(db["positiveIntegerValue"]["presentValue"])
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["priorityarray"]:
-            if objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"]:
-                if useArrayIndex and propertyArrayIndex <= MAX_BACNET_PRIORITY:
-                    value[0] = db["multiStateOutput"]["priorityArray"][propertyArrayIndex - 1]
-                    return True
-                else:
-                    return False
-        elif propertyIdentifier == bacnet_propertyIdentifier["numberofstates"]:
-            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"]:
-                value[0] = 4
-                return True
-            elif objectType == bacnet_objectType["multistateOutput"] and objectInstance == db["multistateOutput"]["instance"]:
-                value[0] = 2
-                return True
-            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"]:
-                value[0] = 3
-                return True
-        elif propertyIdentifier == bacnet_propertyIdentifier["statetext"]:
-            if objectType == bacnet_objectType["multiStateInput"] and objectInstance == db["multiStateInput"]["instance"] \
-                and useArrayIndex and propertyArrayIndex == 0:
-                value[0] = 4
-                return True
-            elif objectType == bacnet_objectType["multiStateOutput"] and objectInstance == db["multiStateOutput"]["instance"] \
-                and useArrayIndex and propertyArrayIndex == 0:
-                value[0] = 2
-                return True
-            elif objectType == bacnet_objectType["multiStateValue"] and objectInstance == db["multiStateValue"]["instance"] \
-                and useArrayIndex and propertyArrayIndex == 0:
-                value[0] = 3
-                return True
-    return False
+    
+    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    if raw_value is None:
+        return False
 
+    value[0] = ctypes.c_uint32(int(raw_value))
+    return True
 
 def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex, priority,
                             errorCode):
     logger.debug("CallbackSetPropertyUInt %s %s %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex,
           priority, errorCode)
-    if deviceInstance == db["device"]["instance"]:
-        if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                db["networkPort"]["FdBbmdAddressPort"] = value
-                db["networkPort"]["changesPending"] = True
-                return True
+    
+    return BACnetDatabase.Set(deviceInstance, objectType, deviceInstance, propertyIdentifier, value)
 
-        elif propertyIdentifier == bacnet_propertyIdentifier["fdsubscriptionlifetime"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                db["networkPort"]["FdSubscriptionLifetime"] = value
-                db["networkPort"]["changesPending"] = True
-                return True
-    return False
 
 
 def CallbackSetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex, propertyArray,
                                    priority, errorCode):
     logger.debug("CallbackSetPropertyOctetString %s %s %s %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex,
           propertyArray, priority, errorCode)
-    if deviceInstance == db["device"]["instance"]:
+    if deviceInstance == int(BACnetDatabase.Get(deviceInstance, bacnet_objectType["device"], deviceInstance, bacnet_propertyIdentifier["instance"])):
         if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-            if objectType == bacnet_objectType["networkPort"] and objectInstance == db["networkPort"]["instance"]:
-                db["networkPort"]["FdBbmdAddressHostIp"][0] = value[0]
-                db["networkPort"]["FdBbmdAddressHostIp"][1] = value[1]
-                db["networkPort"]["FdBbmdAddressHostIp"][2] = value[2]
-                db["networkPort"]["FdBbmdAddressHostIp"][3] = value[3]
-                db["networkPort"]["changesPending"] = False
+            if objectType == bacnet_objectType["networkPort"] and objectInstance == NETWORK_PORT_VERMILLION_INSTANCE:
+                BACnetDatabase.Set(deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp", [value[0], value[1], value[2], value[3]])
+                BACnetDatabase.Set(deviceInstance, objectType, objectInstance, "changesPending", False)
                 return True
     return False
 
@@ -809,10 +423,36 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
 def CallbackLogDebugMessage(message, messageLength, messageType):
     # Rebuild message from pointer reference
     derefedMessage = rebuildString(message, messageLength)
-    logger.debug("CallbackLogDebugMessage %s %s %s", derefedMessage, messageLength, messageType)
+    # logger.debug("CallbackLogDebugMessage %s %s %s", derefedMessage, messageLength, messageType)
+    # 
+    # if derefedMessage != "" and messageLength != 0:
+    #     logger.debug("CAS BACnet Stack DEBUG MESSAGE: %s", derefedMessage)
 
-    if derefedMessage != "" and messageLength != 0:
-        logger.debug("CAS BACnet Stack DEBUG MESSAGE: %s", derefedMessage)
+
+def AddAndConfigureNetworkPort(device_instance):    
+    logger.info("Adding networkPort. networkPort.instance=%s", NETWORK_PORT_VERMILLION_INSTANCE)
+    if not CASBACnetStack.BACnetStack_AddNetworkPortObject(device_instance, NETWORK_PORT_VERMILLION_INSTANCE,
+                                                           casbacnetstack_networkType["ipv4"], casbacnetstack_protocolLevel["bacnet-application"],
+                                                           casbacnetstack_network_port_lowest_protocol_level):
+        logger.error("Failed to add networkPort")
+        exit()
+
+
+    # Load network information into database
+    ip_address = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
+    subnet_mask = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
+    default_gateway = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
+    dnsServerOctetList = []
+    for dnsServer in dns.resolver.Resolver().nameservers:
+        dnsServerOctetList.append([int(octet) for octet in dnsServer.split(".")])
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"], ip_address)
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"], subnet_mask)
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipdefaultgateway"], default_gateway)
+    # BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipnumofdns"], len(dnsServerOctetList))
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipdnsserver"], dnsServerOctetList)
+    logger.info("Local IP address: %s", ip_address)        
+
+
 
 # Main application
 # -----------------------------------------------------------------------------
@@ -862,26 +502,7 @@ if __name__ == "__main__":
 
 
 
-    # 2. Connect the UDP resource to the BACnet Port and get network info
-    # ---------------------------------------------------------------------------
-    logger.info("Connecting UDP Resource to port=%s", db['networkPort']['BACnetIPUDPPort'])
-    HOST = ""  # Symbolic name meaning all available interfaces
-    udpSocket.bind((HOST, db["networkPort"]["BACnetIPUDPPort"]))
-    udpSocket.setblocking(False)
 
-    # Load network information into database
-    db["networkPort"]["ipAddress"] = [int(octet) for octet in
-                                      netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
-    db["networkPort"]["ipSubnetMask"] = [int(octet) for octet in
-                                         netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
-    db["networkPort"]["ipDefaultGateway"] = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
-    dnsServerOctetList = []
-    for dnsServer in dns.resolver.Resolver().nameservers:
-        dnsServerOctetList.append([int(octet) for octet in dnsServer.split(".")])
-    db["networkPort"]["ipNumOfDns"] = len(dnsServerOctetList)
-    db["networkPort"]["ipDnsServer"] = dnsServerOctetList
-
-    logger.info("Local IP address: %s", db["networkPort"]["ipAddress"])
 
     # 3. Setup the callbacks
     # ---------------------------------------------------------------------------
@@ -934,150 +555,73 @@ if __name__ == "__main__":
 
     # 4. Setup the BACnet device
     # ---------------------------------------------------------------------------
-    logger.info("Setting up server Device. device.instance=%s", db['device']['instance'])
-    if not CASBACnetStack.BACnetStack_AddDevice(db["device"]["instance"]):
+    logger.info("Setting up server Device. device.instance=%s", DEVICE_INSTANCE)
+    if not CASBACnetStack.BACnetStack_AddDevice(DEVICE_INSTANCE):
         logger.error("Failed to add Device")
         exit()
 
     # Enable optional BACnet services.
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["readPropertyMultiple"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["writeProperty"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["writePropertyMultiple"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["subscribeCov"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["subscribeCovProperty"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["reinitializeDevice"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["deviceCommunicationControl"], True)
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["iAm"])
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["confirmedTextMessage"])
-    CASBACnetStack.BACnetStack_SetServiceEnabled(db["device"]["instance"], casbacnetstack_service["unconfirmedTextMessage"])
+    for service in ["readPropertyMultiple", "writeProperty", "writePropertyMultiple", "subscribeCov", "subscribeCovProperty", "reinitializeDevice", "deviceCommunicationControl", "iAm", "confirmedTextMessage", "unconfirmedTextMessage"]:
+        CASBACnetStack.BACnetStack_SetServiceEnabled(DEVICE_INSTANCE, casbacnetstack_service[service], True)
 
-    # Add Objects
-    # ---------------------------------------
-    # AnalogInput (AI)
-    logger.info("Adding AnalogInput. AnalogInput.instance=%s", db['analogInput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"]):
-        logger.error("Failed to add analogInput")
+    # Add objects to the device
+    # ---------------------------------------------------------------------------
+    objectList = BACnetDatabase.GetObjectsList(DEVICE_INSTANCE)
+    if objectList is None or len(objectList) == 0:
+        logger.error("No objects found in database for device instance %s", DEVICE_INSTANCE)
         exit()
 
-    # Enable optional properties
-    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["analogInput"], db["analogInput"]["instance"],
-                                                  bacnet_propertyIdentifier["reliability"], True)
+    for obj in objectList:
+        objectType, objectInstance = obj
+        if objectType == bacnet_objectType["device"]:
+            # Device object already added above
+            continue
+        if objectType == bacnet_objectType["networkPort"]:
+            # Network port object already added above
+            continue
+        if not CASBACnetStack.BACnetStack_AddObject(DEVICE_INSTANCE, objectType, objectInstance):
+            logger.error("Failed to add object. Type=%s Instance=%s", objectType, objectInstance)
+            exit()
+        # Look up the object type by the id in the bacnet_objectType dictionary
+        if objectType in bacnet_objectType.values():
+            objectTypeName = [name for name, value in bacnet_objectType.items() if value == objectType][0]
+            logger.info("Added object. %s (%s)", objectTypeName, objectInstance)
 
-    # BinaryInput (BI)
-    logger.info("Adding BinaryInput. BinaryInput.instance=%s", db['binaryInput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryInput"], db["binaryInput"]["instance"]):
-        logger.error("Failed to add BinaryInput")
+    # Network port is a special object that needs to be added and configured
+    # ---------------------------------------------------------------------------        
+    if AddAndConfigureNetworkPort(DEVICE_INSTANCE) is False:
+        logger.error("Failed to add and configure network port")
         exit()
 
-    # MultiStateInput (MSI)
-    logger.info("Adding MultiStateInput. MultiStateInput.instance=%s", db['multiStateInput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateInput"], db["multiStateInput"]["instance"]):
-        logger.error("Failed to add MultiStateInput")
-        exit()
 
-    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateInput"], db["multiStateInput"]["instance"],
-                                                  bacnet_propertyIdentifier["statetext"], True)
 
-    # analogOutput
-    logger.info("Adding analogOutput. analogOutput.instance=%s", db['analogOutput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogOutput"], db["analogOutput"]["instance"]):
-        logger.error("Failed to add analogOutput")
-        exit()
 
-    # analogValue
-    logger.info("Adding analogValue. analogValue.instance=%s", db['analogValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["analogValue"], db["analogValue"]["instance"]):
-        logger.error("Failed to add analogValue")
-        exit()
-
-    # binaryOutput
-    logger.info("Adding binaryOutput. binaryOutput.instance=%s", db['binaryOutput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryOutput"], db["binaryOutput"]["instance"]):
-        logger.error("Failed to add binaryOutput")
-        exit()
-
-    # binaryValue
-    logger.info("Adding binaryValue. binaryValue.instance=%s", db['binaryValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["binaryValue"], db["binaryValue"]["instance"]):
-        logger.error("Failed to add binaryValue")
-        exit()
-
-    # multiStateOutput
-    logger.info("Adding multiStateOutput. multiStateOutput.instance=%s", db['multiStateOutput']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateOutput"], db["multiStateOutput"]["instance"]):
-        logger.error("Failed to add multiStateOutput")
-        exit()
-
-    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateOutput"], db["multiStateOutput"]["instance"],
-                                                  bacnet_propertyIdentifier["statetext"], True)
-
-    # multiStateValue
-    logger.info("Adding multiStateValue. multiStateValue.instance=%s", db['multiStateValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["multiStateValue"], db["multiStateValue"]["instance"]):
-        logger.error("Failed to add multiStateValue")
-        exit()
-
-    CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["multiStateValue"], db["multiStateValue"]["instance"],
-                                                  bacnet_propertyIdentifier["statetext"], True)
-
-    # characterstringValue
-    logger.info("Adding characterstringValue. characterstringValue.instance=%s", db['characterstringValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["characterstringValue"],
-                                                db["characterstringValue"]["instance"]):
-        logger.error("Failed to add characterstringValue")
-        exit()
-
-    # integerValue
-    logger.info("Adding integerValue. integerValue.instance=%s", db['integerValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["integerValue"], db["integerValue"]["instance"]):
-        logger.error("Failed to add integerValue")
-        exit()
-
-    # largeAnalogValue
-    logger.info("Adding largeAnalogValue. largeAnalogValue.instance=%s", db['largeAnalogValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["largeAnalogValue"], db["largeAnalogValue"]["instance"]):
-        logger.error("Failed to add largeAnalogValue")
-        exit()
-
-    # positiveIntegerValue
-    logger.info("Adding positiveIntegerValue. positiveIntegerValue.instance=%s", db['positiveIntegerValue']['instance'])
-    if not CASBACnetStack.BACnetStack_AddObject(db["device"]["instance"], bacnet_objectType["positiveIntegerValue"],
-                                                db["positiveIntegerValue"]["instance"]):
-        logger.error("Failed to add positiveIntegerValue")
-        exit()
-
-    # networkPort
-    logger.info("Adding networkPort. networkPort.instance=%s", db['networkPort']['instance'])
-    if not CASBACnetStack.BACnetStack_AddNetworkPortObject(db["device"]["instance"], db["networkPort"]["instance"],
-                                                           casbacnetstack_networkType["ipv4"], casbacnetstack_protocolLevel["bacnet-application"],
-                                                           casbacnetstack_network_port_lowest_protocol_level):
-        logger.error("Failed to add networkPort")
-        exit()
-    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
-                                                         bacnet_propertyIdentifier["fdbbmdaddress"], True):
-        logger.error("Failed to enable fdBbmdAddress")
-    if not CASBACnetStack.BACnetStack_SetPropertyEnabled(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
-                                                         bacnet_propertyIdentifier["fdsubscriptionlifetime"], True):
-        logger.error("Failed to enable fdSubscriptionLifetime")
-    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
-                                                          bacnet_propertyIdentifier["fdbbmdaddress"], True):
-        logger.error("Failed to set fdBbmdAddress to writable")
-    if not CASBACnetStack.BACnetStack_SetPropertyWritable(db["device"]["instance"], bacnet_objectType["networkPort"], db["networkPort"]["instance"],
-                                                          bacnet_propertyIdentifier["fdsubscriptionlifetime"], True):
-        logger.error("Failed to set fdSubscriptionLifetime to writable")
+    # 2. Connect the UDP resource to the BACnet Port and get network info
+    # ---------------------------------------------------------------------------
+    udp_port = int(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
+    logger.info("Connecting UDP Resource to port=%s", udp_port)
+    HOST = ""  # Symbolic name meaning all available interfaces
+    udpSocket.bind((HOST, udp_port))
+    udpSocket.setblocking(False)
 
     # 5. Send I-Am of this device
     # ---------------------------------------------------------------------------
-    logger.info("Sending I-AM broadcast")
-    addressString = (ctypes.c_uint8 * 6)()
-    octetStringCopy(db["networkPort"]["ipAddress"], addressString, 4)
-    addressString[4] = int(db["networkPort"]["BACnetIPUDPPort"] / 256)
-    addressString[5] = db["networkPort"]["BACnetIPUDPPort"] % 256
+    # logger.info("Sending I-AM broadcast")
+    # addressString = (ctypes.c_uint8 * 6)()
+    # ipAddress = BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"])
+    # udpPort = int(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
+    # for i in range(4):
+    #     addressString[i] = int(ipAddress[i])
+    # addressString[4] = int(udpPort / 256)
+    # addressString[5] = udpPort % 256
 
-    if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(db["device"]["instance"]), ctypes.cast(addressString, ctypes.POINTER(ctypes.c_uint8)),
-                                              ctypes.c_uint8(6), ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
-                                              ctypes.c_uint16(65535), None, ctypes.c_uint8(0)):
-        logger.error("Failed to send I-Am")
+    # if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(DEVICE_INSTANCE), ctypes.cast(addressString, ctypes.POINTER(ctypes.c_uint8)),
+    #                                           ctypes.c_uint8(6), ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
+    #                                           ctypes.c_uint16(65535), None, ctypes.c_uint8(0)):
+    #     logger.error("Failed to send I-Am")
+
+
+
 
     # 6. Start the main loop
     # ---------------------------------------------------------------------------
@@ -1090,12 +634,13 @@ if __name__ == "__main__":
         time.sleep(0.1)
 
         # Every x seconds increment the AnalogInput presentValue property by 0.1
-        if lastTimeValueWasUpdated + 1 < time.time():
-            lastTimeValueWasUpdated = time.time()
-            db["analogInput"]["presentValue"] += 0.1
-            # Notify the stack that this data point was updated so the stack can check for logic
-            # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
-            if CASBACnetStack.BACnetStack_ValueUpdated is not None:
-                CASBACnetStack.BACnetStack_ValueUpdated(db["device"]["instance"], bacnet_objectType["analogValue"], db["analogValue"]["instance"],
-                                                        bacnet_propertyIdentifier["presentValue"])
-            logger.info("Updating AnalogInput (0) PresentValue: %s", round(db["analogInput"]["presentValue"], 1))
+        # if lastTimeValueWasUpdated + 1 < time.time():
+        #     lastTimeValueWasUpdated = time.time()
+        #     presentValue = float(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"]))
+        #     presentValue += 0.1
+        #     BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], presentValue)
+        #     # Notify the stack that this data point was updated so the stack can check for logic
+        #     # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
+        #     if CASBACnetStack.BACnetStack_ValueUpdated is not None:
+        #         CASBACnetStack.BACnetStack_ValueUpdated(device_instance, bacnet_objectType["analogValue"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"])
+        #     logger.info("Updating AnalogInput (0) PresentValue: %s", round(presentValue, 1))

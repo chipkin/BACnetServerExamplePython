@@ -351,7 +351,7 @@ bacnet_propertyIdentifier = {"absenteelimit": 244, "acceptedmodes": 175, "access
                              "optional": 80, "outofservice": 81, "outputunits": 82, "packetreordertime": 333,
                              "passbackmode": 300, "passbacktimeout": 301, "passengeralarm": 478, "polarity": 84,
                              "portfilter": 363, "positiveaccessrules": 302, "power": 384, "powermode": 479,
-                             "prescale": 185, "presentValue": 85, "priority": 86, "priorityarray": 87,
+                             "prescale": 185, "presentvalue": 85, "priority": 86, "priorityarray": 87,
                              "priorityforwriting": 88, "processidentifier": 89, "processidentifierfilter": 361,
                              "profilelocation": 485, "profilename": 168, "programchange": 90, "programlocation": 91,
                              "programstate": 92, "propertylist": 371, "proportionalconstant": 93,
