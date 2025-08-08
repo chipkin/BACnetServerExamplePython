@@ -44,10 +44,8 @@ class ExampleDatabase:
             propertyIdentifier = int(propertyIdentifier)
         except Exception:
             print(f"Invalid parameter type. All parameters must be convertible to int.")
+            print(f"Received: deviceInstance={deviceInstance}, objectType={objectType}, objectInstance={objectInstance}, propertyIdentifier={propertyIdentifier}")
             return None
-
-
-
         
         try:
             raw_value = self.db[deviceInstance][objectType][objectInstance][propertyIdentifier]
@@ -55,14 +53,27 @@ class ExampleDatabase:
                return None
             
             if useArrayIndex:
+
+                if propertyArrayIndex == 0:
+                    # We are trying to find the array size
+                    print(f"Array size requested for property {propertyIdentifier}. Returning size: {len(raw_value)}")
+                    return len(raw_value)
+
+                # BACnet starts counting the array index from 1
+                # We remove one from the index so that its Zero offset 
+                propertyArrayIndex -= 1
+
                 if isinstance(raw_value, list) and propertyArrayIndex < len(raw_value):
+                    print(f"Array index {propertyArrayIndex} found for property {propertyIdentifier}: {raw_value[propertyArrayIndex]}")
                     return str(raw_value[propertyArrayIndex])
                 else:
                     print(f"Array index {propertyArrayIndex} out of range for property {propertyIdentifier}")
                     return None
             elif isinstance(raw_value, list):
+                print(f"Array found for property {propertyIdentifier}: {raw_value}")
                 return raw_value
             else:
+              print(f"Value found for property {propertyIdentifier}: {raw_value}")
               return str(raw_value)
         except KeyError:
             print(f"Failed to retrieve value for Device {deviceInstance}, Object Type {objectType}, Instance {objectInstance}, Property {propertyIdentifier}")
@@ -101,16 +112,7 @@ class ExampleDatabase:
             self.db[deviceInstance][objectType][objectInstance][propertyIdentifier][propertyArrayIndex] = value
         else:
             # Directly set the value without array index
-            if propertyIdentifier not in self.db[deviceInstance][objectType][objectInstance]:
-                self.db[deviceInstance][objectType][objectInstance][propertyIdentifier] = value
-            else:
-                # Update existing property
-                if isinstance(self.db[deviceInstance][objectType][objectInstance][propertyIdentifier], list):
-                    # If it's a list, append the new value
-                    self.db[deviceInstance][objectType][objectInstance][propertyIdentifier].append(value)
-                else:
-                    # Otherwise, just set the value
-                    self.db[deviceInstance][objectType][objectInstance][propertyIdentifier] = value
+            self.db[deviceInstance][objectType][objectInstance][propertyIdentifier] = value
 
 
 
