@@ -1,6 +1,7 @@
-# CAS BACnet Stack Python Server Example 
-# https://github.com/chipkin/BACnetServerExamplePython 
+# CAS BACnet Stack Python Server Example
+# https://github.com/chipkin/BACnetServerExamplePython
 #
+import BACnetServerExampleDatabase as db_module
 import ctypes
 import logging
 import os
@@ -10,9 +11,14 @@ import netifaces
 import dns.resolver  # Package name: dnspython
 import socket
 import time  # Sleep function
-from CASBACnetStackAdapter import *  # Contains all the Enumerations, and callback prototypes
+# Contains all the Enumerations, and callback prototypes
+from CASBACnetStackAdapter import *
 
-import BACnetServerExampleDatabase as db_module
+# Globals
+# -----------------------------------------------------------------------------
+udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+lastTimeValueWasUpdated = 0
+
 BACnetDatabase = db_module.ExampleDatabase()
 
 # Configure logging
@@ -23,11 +29,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-
 # Example database
-# -----------------------------------------------------------------------------
-# This is an example database. Normally this data would come from your 
+# -------------------------------------------------------------------------------------------------
+# This is an example database. Normally this data would come from your
 # sensor/database
 
 DEVICE_INSTANCE = 389001
@@ -47,55 +51,79 @@ POSITIVE_INTEGER_VALUE_SILVER_INSTANCE = 48
 NETWORK_PORT_VERMILLION_INSTANCE = 56
 MAX_BACNET_PRIORITY = 16
 
-
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["objectname"], "Device Rainbow")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["vendorname"], "Example Chipkin Automation Systems")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE, bacnet_propertyIdentifier["vendoridentifier"], 0)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogInput Bronze")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 99.6)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["units"], bacnet_engineeringUnits["degreescelsius"])
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["reliability"], bacnet_reliability["no-fault-detected"])
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryInput Emerald")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["reliability"], bacnet_reliability["no-fault-detected"])
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"], MULTISTATE_INPUT_HOTPINK_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateInput Hot Pink")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"], MULTISTATE_INPUT_HOTPINK_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 3)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"], ANALOG_OUTPUT_CHARTREUSE_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogOutput Chartreuse")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"], ANALOG_OUTPUT_CHARTREUSE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_VALUE_DIAMOND_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogValue Diamond")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_VALUE_DIAMOND_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"], BINARY_OUTPUT_FUCHSIA_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryOutput Fuchsia")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"], BINARY_OUTPUT_FUCHSIA_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"], BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryValue Gold")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"], BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"], MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateOutput Indigo")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"], MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"], MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateValue Kiwi")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"], MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"], CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["objectname"], "CharacterstringValue Nickel")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"], CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["presentvalue"], "hello world")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"], INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["objectname"], "IntegerValue Purple")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"], INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"], LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["objectname"], "LargeAnalogValue Quartz")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"], LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"], POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["objectname"], "PositiveIntegerValue Silver")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"], POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["objectname"], "NetworkPort Vermillion")
-BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"], 47808)
-
-
-# Globals
-# -----------------------------------------------------------------------------
-udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-lastTimeValueWasUpdated = 0
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "Device Rainbow")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"], DEVICE_INSTANCE,
+                   bacnet_propertyIdentifier["vendorname"], "Example Chipkin Automation Systems")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["device"],
+                   DEVICE_INSTANCE, bacnet_propertyIdentifier["vendoridentifier"], 0)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"],
+                   ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["objectname"], "AnalogInput Bronze")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"],
+                   ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 99.6)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE,
+                   bacnet_propertyIdentifier["units"], bacnet_engineeringUnits["degreescelsius"])
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"], BINARY_INPUT_EMERALD_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "BinaryInput Emerald")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryInput"],
+                   BINARY_INPUT_EMERALD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"], MULTISTATE_INPUT_HOTPINK_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "MultiStateInput Hot Pink")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateInput"],
+                   MULTISTATE_INPUT_HOTPINK_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 3)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"], ANALOG_OUTPUT_CHARTREUSE_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "AnalogOutput Chartreuse")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogOutput"],
+                   ANALOG_OUTPUT_CHARTREUSE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_VALUE_DIAMOND_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "AnalogValue Diamond")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogValue"],
+                   ANALOG_VALUE_DIAMOND_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"], BINARY_OUTPUT_FUCHSIA_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "BinaryOutput Fuchsia")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryOutput"],
+                   BINARY_OUTPUT_FUCHSIA_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"],
+                   BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["objectname"], "BinaryValue Gold")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["binaryValue"],
+                   BINARY_VALUE_GOLD_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"],
+                   MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateOutput Indigo")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateOutput"],
+                   MULTISTATE_OUTPUT_INDIGO_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"],
+                   MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["objectname"], "MultiStateValue Kiwi")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["multiStateValue"],
+                   MULTISTATE_VALUE_KIWI_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"],
+                   CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["objectname"], "CharacterstringValue Nickel")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["characterstringValue"],
+                   CHARACTERSTRING_VALUE_NICKEL_INSTANCE, bacnet_propertyIdentifier["presentvalue"], "hello world")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"],
+                   INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["objectname"], "IntegerValue Purple")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["integerValue"],
+                   INTEGER_VALUE_PURPLE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"],
+                   LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["objectname"], "LargeAnalogValue Quartz")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["largeAnalogValue"],
+                   LARGE_ANALOG_VALUE_QUARTZ_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"],
+                   POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["objectname"], "PositiveIntegerValue Silver")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["positiveIntegerValue"],
+                   POSITIVE_INTEGER_VALUE_SILVER_INSTANCE, bacnet_propertyIdentifier["presentvalue"], 1)
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE,
+                   bacnet_propertyIdentifier["objectname"], "NetworkPort Vermillion")
+BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                   NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"], 47808)
 
 
 def octetStringCopy(source, destination, length, offset=0):
     for i in range(length):
         destination[i + offset] = source[i]
 
-
 # Rebuilds string from ctype.c_uint_8 arrray
+
+
 def rebuildString(strPointer, length):
     rebuiltStr = ""
     for i in range(0, length):
@@ -112,15 +140,18 @@ def CallbackReceiveMessage(message, maxMessageLength, receivedConnectionString, 
         # if not data:
         #     logger.debug("not data")
         # A message was received.
-        logger.debug("CallbackReceiveMessage. Message Received %s %s %s", addr, data, len(data))
+        logger.debug(
+            "CallbackReceiveMessage. Message Received %s %s %s", addr, data, len(data))
 
         # Convert the received address to the CAS BACnet Stack connection string format.
         ip_as_bytes = bytes(map(int, addr[0].split(".")))
         for i in range(len(ip_as_bytes)):
             receivedConnectionString[i] = ip_as_bytes[i]
+
         # UDP Port
         receivedConnectionString[4] = int(addr[1] / 256)
         receivedConnectionString[5] = addr[1] % 256
+
         # New ConnectionString Length
         receivedConnectionStringLength[0] = 6
 
@@ -150,14 +181,15 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
     if broadcast:
         # Use broadcast IP address
         # ToDo: Get the subnet mask and apply it to the IP address
-        logger.debug("ToDo: Broadcast this message. Local IP: %s Subnet: %s Broadcast IP: ????", 
-                     BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"]),
+        logger.debug("ToDo: Broadcast this message. Local IP: %s Subnet: %s Broadcast IP: ????",
+                     BACnetDatabase.Get(
+                         DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"]),
                      BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"]))
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
-                    f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
+            f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
     else:
         ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
-                    f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
+            f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
 
     # Extract the message from CAS BACnet Stack to a bytearray
     data = bytearray(messageLength)
@@ -174,9 +206,11 @@ def CallbackGetSystemTime():
 
 
 def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyReal %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyReal %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
 
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         logger.debug("Value not found in database")
         return False
@@ -184,12 +218,14 @@ def CallbackGetPropertyReal(deviceInstance, objectType, objectInstance, property
     value[0] = ctypes.c_float(float(raw_value))
     return True
 
+
 def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                   encodingType, useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyCharString %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex,
-          propertyArrayIndex)
+                 propertyArrayIndex)
 
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
@@ -198,6 +234,7 @@ def CallbackGetPropertyCharString(deviceInstance, objectType, objectInstance, pr
         value[i] = raw_value_encoded[i]
     valueElementCount[0] = len(raw_value_encoded)
     return True
+
 
 def ValueToKey(enumeration, searchValue):
     # https://www.geeksforgeeks.org/python-get-key-from-value-in-dictionary/
@@ -208,85 +245,107 @@ def ValueToKey(enumeration, searchValue):
 
 
 def CallbackGetPropertyEnumerated(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyEnumerated %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, propertyArrayIndex)
-    
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyEnumerated %s %s %s %s %s", deviceInstance,
+                 objectType, objectInstance, propertyIdentifier, propertyArrayIndex)
+
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
     value[0] = ctypes.c_uint32(int(raw_value))
     return True
 
+
 def CallbackGetPropertyBitString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                  useArrayIndex, propertyArrayIndex):
     logger.debug("CallbackGetPropertyBitString %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex,
-          propertyArrayIndex)
+                 propertyArrayIndex)
     return False
 
 
 def CallbackGetPropertyBool(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyBool %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-   
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyBool %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
     value[0] = bool(raw_value)
     return True
 
+
 def CallbackGetPropertyDate(deviceInstance, objectType, objectInstance, propertyIdentifier, year, month, day, weekday, useArrayIndex,
                             propertyArrayIndex):
-    logger.debug("CallbackGetPropertyDate %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyDate %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     return False
 
 
 def CallbackGetPropertyDouble(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyDouble %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-        
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyDouble %s %s %s %s %s %s", deviceInstance,
+                 objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
     value[0] = ctypes.c_double(float(raw_value))
     return True
 
+
 def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, valueElementCount, maxElementCount,
                                    useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyOctetString %s %s %s %s %s %s", deviceInstance, objectInstance, propertyIdentifier, maxElementCount, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyOctetString %s %s %s %s %s %s", deviceInstance,
+                 objectInstance, propertyIdentifier, maxElementCount, useArrayIndex, propertyArrayIndex)
     if objectType == bacnet_objectType["networkPort"] and objectInstance == NETWORK_PORT_VERMILLION_INSTANCE:
         if propertyIdentifier == bacnet_propertyIdentifier["ipaddress"]:
-            ip_addr = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipAddress")
-            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            ip_addr = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipAddress")
+            ip_length = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipLength")
             if ip_addr is not None and ip_length is not None:
                 valueElementCount[0] = int(ip_length)
                 octetStringCopy(ip_addr, value, int(ip_length))
-                logger.debug("IN GET IP: output = %s.%s.%s.%s", value[0], value[1], value[2], value[3])
+                logger.debug("IN GET IP: output = %s.%s.%s.%s",
+                             value[0], value[1], value[2], value[3])
                 return True
         elif propertyIdentifier == bacnet_propertyIdentifier["ipdefaultgateway"]:
-            ip_default_gateway = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipDefaultGateway")
-            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            ip_default_gateway = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipDefaultGateway")
+            ip_length = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipLength")
             if ip_default_gateway is not None and ip_length is not None:
                 valueElementCount[0] = int(ip_length)
                 octetStringCopy(ip_default_gateway, value, int(ip_length))
                 return True
         elif propertyIdentifier == bacnet_propertyIdentifier["ipsubnetmask"]:
-            ip_subnet_mask = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipSubnetMask")
-            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            ip_subnet_mask = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipSubnetMask")
+            ip_length = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipLength")
             if ip_subnet_mask is not None and ip_length is not None:
                 valueElementCount[0] = int(ip_length)
                 octetStringCopy(ip_subnet_mask, value, int(ip_length))
                 return True
         elif propertyIdentifier == bacnet_propertyIdentifier["ipdnsserver"]:
-            ip_dns_server = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipDnsServer")
-            ip_num_of_dns = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipNumOfDns")
+            ip_dns_server = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipDnsServer")
+            ip_num_of_dns = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipNumOfDns")
             if ip_dns_server is not None and ip_num_of_dns is not None:
                 valueElementCount[0] = int(ip_num_of_dns) * 4
                 for i in range(int(ip_num_of_dns)):
                     octetStringCopy(ip_dns_server[i], value, 4, i * 4)
                 return True
         elif propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
-            fdbbmd_address_host_ip = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp")
-            ip_length = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, "ipLength")
+            fdbbmd_address_host_ip = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp")
+            ip_length = BACnetDatabase.Get(
+                deviceInstance, objectType, objectInstance, "ipLength")
             if fdbbmd_address_host_ip is not None and ip_length is not None:
                 valueElementCount[0] = int(ip_length)
                 octetStringCopy(fdbbmd_address_host_ip, value, int(ip_length))
@@ -295,9 +354,11 @@ def CallbackGetPropertyOctetString(deviceInstance, objectType, objectInstance, p
 
 
 def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyInt %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyInt %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
@@ -307,38 +368,43 @@ def CallbackGetPropertyInt(deviceInstance, objectType, objectInstance, propertyI
 
 def CallbackGetPropertyTime(deviceInstance, objectType, objectInstance, propertyIdentifier, hour, minute, second, hundrethSeconds, useArrayIndex,
                             propertyArrayIndex):
-    logger.debug("CallbackGetPropertyTime %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyTime %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     return False
 
 
 def CallbackGetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex):
-    logger.debug("CallbackGetPropertyUInt %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
-    
-    raw_value = BACnetDatabase.Get(deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+    logger.debug("CallbackGetPropertyUInt %s %s %s %s %s %s", deviceInstance, objectType,
+                 objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
+
+    raw_value = BACnetDatabase.Get(
+        deviceInstance, objectType, objectInstance, propertyIdentifier, useArrayIndex, propertyArrayIndex)
     if raw_value is None:
         return False
 
     value[0] = ctypes.c_uint32(int(raw_value))
     return True
 
+
 def CallbackSetPropertyUInt(deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex, priority,
                             errorCode):
     logger.debug("CallbackSetPropertyUInt %s %s %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, value, useArrayIndex, propertyArrayIndex,
-          priority, errorCode)
-    
-    return BACnetDatabase.Set(deviceInstance, objectType, deviceInstance, propertyIdentifier, value)
+                 priority, errorCode)
 
+    return BACnetDatabase.Set(deviceInstance, objectType, deviceInstance, propertyIdentifier, value)
 
 
 def CallbackSetPropertyOctetString(deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex, propertyArray,
                                    priority, errorCode):
     logger.debug("CallbackSetPropertyOctetString %s %s %s %s %s %s %s %s %s %s", deviceInstance, objectType, objectInstance, propertyIdentifier, value, length, useArrayIndex,
-          propertyArray, priority, errorCode)
+                 propertyArray, priority, errorCode)
     if deviceInstance == int(BACnetDatabase.Get(deviceInstance, bacnet_objectType["device"], deviceInstance, bacnet_propertyIdentifier["instance"])):
         if propertyIdentifier == bacnet_propertyIdentifier["fdbbmdaddress"]:
             if objectType == bacnet_objectType["networkPort"] and objectInstance == NETWORK_PORT_VERMILLION_INSTANCE:
-                BACnetDatabase.Set(deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp", [value[0], value[1], value[2], value[3]])
-                BACnetDatabase.Set(deviceInstance, objectType, objectInstance, "changesPending", False)
+                BACnetDatabase.Set(deviceInstance, objectType, objectInstance, "FdBbmdAddressHostIp", [
+                                   value[0], value[1], value[2], value[3]])
+                BACnetDatabase.Set(deviceInstance, objectType,
+                                   objectInstance, "changesPending", False)
                 return True
     return False
 
@@ -347,7 +413,8 @@ def CallbackReinitializeDevice(deviceInstance, reinitializedState, password, pas
     # Rebuild password from pointer reference
     derefedPassword = rebuildString(password, passwordLength)
 
-    logger.debug("CallbackReinitializeDevice %s %s %s %s %s", deviceInstance, reinitializedState, derefedPassword, passwordLength, errorCode[0])
+    logger.debug("CallbackReinitializeDevice %s %s %s %s %s", deviceInstance,
+                 reinitializedState, derefedPassword, passwordLength, errorCode[0])
 
     # This callback is called when this BACnet Server device receives a ReinitializeDevice message
     # In this callback, you will handle the reinitializedState
@@ -400,7 +467,7 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
     derefedPassword = rebuildString(password, passwordLength)
 
     logger.debug("CallbackDeviceCommunicationControl %s %s %s %s %s %s %s", deviceInstance, enableDisable, derefedPassword, passwordLength, useTimeDuration, timeDuration,
-          errorCode[0])
+                 errorCode[0])
 
     # This callback is called when this BACnet Server device receives a DeviceCommunicationControl message
     # In this callback, you will handle the password. All other parameters are purely for logging to know
@@ -420,58 +487,142 @@ def CallbackDeviceCommunicationControl(deviceInstance, enableDisable, password, 
     # Return true to allow DeviceCommunicationControl logic to continue
     return True
 
+
 def CallbackLogDebugMessage(message, messageLength, messageType):
     # Rebuild message from pointer reference
     derefedMessage = rebuildString(message, messageLength)
     # logger.debug("CallbackLogDebugMessage %s %s %s", derefedMessage, messageLength, messageType)
-    # 
+    #
     # if derefedMessage != "" and messageLength != 0:
     #     logger.debug("CAS BACnet Stack DEBUG MESSAGE: %s", derefedMessage)
 
 
-def AddAndConfigureNetworkPort(device_instance):    
-    logger.info("Adding networkPort. networkPort.instance=%s", NETWORK_PORT_VERMILLION_INSTANCE)
+def AddAndConfigureNetworkPort(device_instance):
+    logger.info("Adding networkPort. networkPort.instance=%s",
+                NETWORK_PORT_VERMILLION_INSTANCE)
     if not CASBACnetStack.BACnetStack_AddNetworkPortObject(device_instance, NETWORK_PORT_VERMILLION_INSTANCE,
-                                                           casbacnetstack_networkType["ipv4"], casbacnetstack_protocolLevel["bacnet-application"],
+                                                           casbacnetstack_networkType[
+                                                               "ipv4"], casbacnetstack_protocolLevel["bacnet-application"],
                                                            casbacnetstack_network_port_lowest_protocol_level):
         logger.error("Failed to add networkPort")
         exit()
 
-
     # Load network information into database
-    ip_address = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
-    subnet_mask = [int(octet) for octet in netifaces.ifaddresses(netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
-    default_gateway = [int(octet) for octet in netifaces.gateways()["default"][netifaces.AF_INET][0].split(".")]
+    ip_address = [int(octet) for octet in netifaces.ifaddresses(
+        netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
+    subnet_mask = [int(octet) for octet in netifaces.ifaddresses(
+        netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
+    default_gateway = [int(octet) for octet in netifaces.gateways()[
+        "default"][netifaces.AF_INET][0].split(".")]
     dnsServerOctetList = []
     for dnsServer in dns.resolver.Resolver().nameservers:
-        dnsServerOctetList.append([int(octet) for octet in dnsServer.split(".")])
-    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"], ip_address)
-    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"], subnet_mask)
-    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipdefaultgateway"], default_gateway)
+        dnsServerOctetList.append([int(octet)
+                                  for octet in dnsServer.split(".")])
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                       NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"], ip_address)
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                       NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"], subnet_mask)
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE,
+                       bacnet_propertyIdentifier["ipdefaultgateway"], default_gateway)
     # BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipnumofdns"], len(dnsServerOctetList))
-    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipdnsserver"], dnsServerOctetList)
-    logger.info("Local IP address: %s", ip_address)        
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                       NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipdnsserver"], dnsServerOctetList)
+    logger.info("Local IP address: %s", ip_address)
 
 
+def SendIAmBroadcast():
 
-# Main application
-# -----------------------------------------------------------------------------
+    ipAddress = BACnetDatabase.Get(
+        DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"])
+    udpPort = int(BACnetDatabase.Get(
+        DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
+    if ipAddress is None or udpPort is None:
+        logger.error(
+            "Missing IP address or UDP port. Can not send I-AM broadcast")
+        return
+
+    logger.info("Sending I-AM broadcast ipAddress: %s, udpPort: %s",
+                ipAddress, udpPort)
+
+    # Convert the IP Address and UDP Port to a byte string that can be used by the CAS BACnet Stack
+    addressString = (ctypes.c_uint8 * 6)()
+    octetStringCopy(ipAddress, addressString, 4)
+    addressString[4] = int(udpPort / 256)
+    addressString[5] = int(udpPort % 256)
+
+    if not CASBACnetStack.BACnetStack_SendIAm(
+            ctypes.c_uint32(DEVICE_INSTANCE),
+            ctypes.cast(addressString, ctypes.POINTER(ctypes.c_uint8)),
+            ctypes.c_uint8(6),
+            ctypes.c_uint8(casbacnetstack_networkType["ip"]),
+            ctypes.c_bool(True),
+            ctypes.c_uint16(65535),
+            None,
+            ctypes.c_uint8(0)):
+        logger.error("Failed to send I-Am")
+
+
+def AddObjectsFromDatabase(objectList):
+    for obj in objectList:
+        objectType, objectInstance = obj
+        if objectType == bacnet_objectType["device"] or objectType == bacnet_objectType["networkPort"]:
+            # Network port object already added above
+            continue
+
+        # Add the object to the BACnet stack
+        if not CASBACnetStack.BACnetStack_AddObject(DEVICE_INSTANCE, objectType, objectInstance):
+            logger.error("Failed to add object. Type=%s Instance=%s",
+                         objectType, objectInstance)
+            exit()
+
+        # Print a message to the log
+        # Look up the object type by the id in the bacnet_objectType dictionary
+        if objectType in bacnet_objectType.values():
+            objectTypeName = [
+                name for name, value in bacnet_objectType.items() if value == objectType][0]
+            logger.info("Added object. %s (%s)",
+                        objectTypeName, objectInstance)
+
+
+def ConnectToSocket(udp_port):
+    logger.info("Connecting UDP Resource to port=%s", udp_port)
+    HOST = ""  # Symbolic name meaning all available interfaces
+    udpSocket.bind((HOST, udp_port))
+    udpSocket.setblocking(False)
+
+
+def updateValues():
+    presentValue = float(BACnetDatabase.Get(
+        DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"]))
+    presentValue += 0.1
+    BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"],
+                       ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], presentValue)
+    # Notify the stack that this data point was updated so the stack can check for logic
+    # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
+    if CASBACnetStack.BACnetStack_ValueUpdated is not None:
+        CASBACnetStack.BACnetStack_ValueUpdated(
+            DEVICE_INSTANCE, bacnet_objectType["analogValue"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"])
+    logger.info("Updating AnalogInput (0) PresentValue: %s",
+                round(presentValue, 1))
+
+
+    # Main application
+    # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     print("FYI: CAS BACnet Stack Python Server Example v0.1.0")
     print("FYI: https://github.com/chipkin/BACnetServerExamplePython")
 
-    """
-    Check for required dependencies: Python version, BACnet Stack DLL and required packages for 
-    this example
-    -----------------------------------------------------------------------------------------------
-    """
+    # 0. Check for required dependencies: Python version, BACnet Stack DLL and required packages
+    #    for this example
+    # ---------------------------------------------------------------------------------------------
     # Check Python version
     if sys.version_info < (3, 7):
         logging.error("Python 3.7 or higher is required.")
         sys.exit(1)
 
     # Check for CASBACnetStack_x64_Release.dll
-    dll_path = os.path.join(os.path.dirname(__file__), 'CASBACnetStack_x64_Release.dll')
+    dll_path = os.path.join(os.path.dirname(__file__),
+                            'CASBACnetStack_x64_Release.dll')
     if not os.path.isfile(dll_path):
         logging.error(f"Missing required DLL: {dll_path}")
         sys.exit(1)
@@ -485,29 +636,28 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # 1. Load the CAS BACnet stack functions
-    # ---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------
     # Load the shared library into ctypes
     libpath = pathlib.Path().absolute() / libname
     logger.info("Library path: %s", libpath)
     CASBACnetStack = ctypes.CDLL(str(libpath), mode=ctypes.RTLD_GLOBAL)
+    if not CASBACnetStack:
+        logger.error("Failed to load CAS BACnet Stack library")
+        sys.exit(1)
 
     # Print the version information
     logger.info("CAS BACnet Stack version: %s.%s.%s.%s",
-          CASBACnetStack.BACnetStack_GetAPIMajorVersion(),
-          CASBACnetStack.BACnetStack_GetAPIMinorVersion(),
-          CASBACnetStack.BACnetStack_GetAPIPatchVersion(),
-          CASBACnetStack.BACnetStack_GetAPIBuildVersion())
-    logger.info("CAS BACnet Stack python adapter version: %s", casbacnetstack_adapter_version)
+                CASBACnetStack.BACnetStack_GetAPIMajorVersion(),
+                CASBACnetStack.BACnetStack_GetAPIMinorVersion(),
+                CASBACnetStack.BACnetStack_GetAPIPatchVersion(),
+                CASBACnetStack.BACnetStack_GetAPIBuildVersion())
+    logger.info("CAS BACnet Stack python adapter version: %s",
+                casbacnetstack_adapter_version)
 
-
-
-
-
-
-    # 3. Setup the callbacks
-    # ---------------------------------------------------------------------------
+    # 2. Setup the callbacks
+    # ---------------------------------------------------------------------------------------------
     logger.info("Registering the Callback Functions with the CAS BACnet Stack")
-
+    
     # Note:
     # Make sure you keep references to CFUNCTYPE() objects as long as they are used from C code.
     # ctypes doesn't, and if you don"t, they may be garbage collected, crashing your program when
@@ -515,132 +665,131 @@ if __name__ == "__main__":
     #
     # Because of garbage collection, the pyCallback**** functions need to stay in scope.
     pyCallbackReceiveMessage = fpCallbackReceiveMessage(CallbackReceiveMessage)
-    CASBACnetStack.BACnetStack_RegisterCallbackReceiveMessage(pyCallbackReceiveMessage)
+    CASBACnetStack.BACnetStack_RegisterCallbackReceiveMessage(
+        pyCallbackReceiveMessage)
     pyCallbackSendMessage = fpCallbackSendMessage(CallbackSendMessage)
-    CASBACnetStack.BACnetStack_RegisterCallbackSendMessage(pyCallbackSendMessage)
+    CASBACnetStack.BACnetStack_RegisterCallbackSendMessage(
+        pyCallbackSendMessage)
     pyCallbackGetSystemTime = fpCallbackGetSystemTime(CallbackGetSystemTime)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetSystemTime(pyCallbackGetSystemTime)
-    pyCallbackGetPropertyBitString = fpCallbackGetPropertyBitString(CallbackGetPropertyBitString)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyBitString(pyCallbackGetPropertyBitString)
-    pyCallbackGetPropertyBool = fpCallbackGetPropertyBool(CallbackGetPropertyBool)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyBool(pyCallbackGetPropertyBool)
-    pyCallbackGetPropertyCharString = fpCallbackGetPropertyCharString(CallbackGetPropertyCharString)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyCharacterString(pyCallbackGetPropertyCharString)
-    pyCallbackGetPropertyDate = fpCallbackGetPropertyDate(CallbackGetPropertyDate)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyDate(pyCallbackGetPropertyDate)
-    pyCallbackGetPropertyDouble = fpCallbackGetPropertyDouble(CallbackGetPropertyDouble)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyDouble(pyCallbackGetPropertyDouble)
-    pyCallbackGetPropertyEnum = fpCallbackGetPropertyEnum(CallbackGetPropertyEnumerated)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyEnumerated(pyCallbackGetPropertyEnum)
-    pyCallbackGetPropertyOctetString = fpCallbackGetPropertyOctetString(CallbackGetPropertyOctetString)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyOctetString(pyCallbackGetPropertyOctetString)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetSystemTime(
+        pyCallbackGetSystemTime)
+    pyCallbackGetPropertyBitString = fpCallbackGetPropertyBitString(
+        CallbackGetPropertyBitString)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyBitString(
+        pyCallbackGetPropertyBitString)
+    pyCallbackGetPropertyBool = fpCallbackGetPropertyBool(
+        CallbackGetPropertyBool)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyBool(
+        pyCallbackGetPropertyBool)
+    pyCallbackGetPropertyCharString = fpCallbackGetPropertyCharString(
+        CallbackGetPropertyCharString)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyCharacterString(
+        pyCallbackGetPropertyCharString)
+    pyCallbackGetPropertyDate = fpCallbackGetPropertyDate(
+        CallbackGetPropertyDate)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyDate(
+        pyCallbackGetPropertyDate)
+    pyCallbackGetPropertyDouble = fpCallbackGetPropertyDouble(
+        CallbackGetPropertyDouble)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyDouble(
+        pyCallbackGetPropertyDouble)
+    pyCallbackGetPropertyEnum = fpCallbackGetPropertyEnum(
+        CallbackGetPropertyEnumerated)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyEnumerated(
+        pyCallbackGetPropertyEnum)
+    pyCallbackGetPropertyOctetString = fpCallbackGetPropertyOctetString(
+        CallbackGetPropertyOctetString)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyOctetString(
+        pyCallbackGetPropertyOctetString)
     pyCallbackGetPropertyInt = fpCallbackGetPropertyInt(CallbackGetPropertyInt)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertySignedInteger(pyCallbackGetPropertyInt)
-    pyCallbackGetPropertyReal = fpCallbackGetPropertyReal(CallbackGetPropertyReal)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyReal(pyCallbackGetPropertyReal)
-    pyCallbackGetPropertyTime = fpCallbackGetPropertyTime(CallbackGetPropertyTime)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyTime(pyCallbackGetPropertyTime)
-    pyCallbackGetPropertyUInt = fpCallbackGetPropertyUInt(CallbackGetPropertyUInt)
-    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyUnsignedInteger(pyCallbackGetPropertyUInt)
-    pyCallbackSetPropertyUInt = fpCallbackSetPropertyUInt(CallbackSetPropertyUInt)
-    CASBACnetStack.BACnetStack_RegisterCallbackSetPropertyUnsignedInteger(pyCallbackSetPropertyUInt)
-    pyCallbackSetPropertyOctetString = fpCallbackSetPropertyOctetString(CallbackSetPropertyOctetString)
-    CASBACnetStack.BACnetStack_RegisterCallbackSetPropertyOctetString(pyCallbackSetPropertyOctetString)
-    pyCallbackReinitializeDevice = fpCallbackReinitializeDevice(CallbackReinitializeDevice)
-    CASBACnetStack.BACnetStack_RegisterCallbackReinitializeDevice(pyCallbackReinitializeDevice)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertySignedInteger(
+        pyCallbackGetPropertyInt)
+    pyCallbackGetPropertyReal = fpCallbackGetPropertyReal(
+        CallbackGetPropertyReal)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyReal(
+        pyCallbackGetPropertyReal)
+    pyCallbackGetPropertyTime = fpCallbackGetPropertyTime(
+        CallbackGetPropertyTime)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyTime(
+        pyCallbackGetPropertyTime)
+    pyCallbackGetPropertyUInt = fpCallbackGetPropertyUInt(
+        CallbackGetPropertyUInt)
+    CASBACnetStack.BACnetStack_RegisterCallbackGetPropertyUnsignedInteger(
+        pyCallbackGetPropertyUInt)
+    pyCallbackSetPropertyUInt = fpCallbackSetPropertyUInt(
+        CallbackSetPropertyUInt)
+    CASBACnetStack.BACnetStack_RegisterCallbackSetPropertyUnsignedInteger(
+        pyCallbackSetPropertyUInt)
+    pyCallbackSetPropertyOctetString = fpCallbackSetPropertyOctetString(
+        CallbackSetPropertyOctetString)
+    CASBACnetStack.BACnetStack_RegisterCallbackSetPropertyOctetString(
+        pyCallbackSetPropertyOctetString)
+    pyCallbackReinitializeDevice = fpCallbackReinitializeDevice(
+        CallbackReinitializeDevice)
+    CASBACnetStack.BACnetStack_RegisterCallbackReinitializeDevice(
+        pyCallbackReinitializeDevice)
     # pyCallbackDeviceCommunicationControl = fpCallbackDeviceCommunicationControl(CallbackDeviceCommunicationControl)
     # CASBACnetStack.BACnetStack_RegisterCallbackDeviceCommunicationControl(pyCallbackDeviceCommunicationControl)
     # pyCallbackLogDebugMessage = fpCallbackLogDebugMessage(CallbackLogDebugMessage)
     # CASBACnetStack.BACnetStack_RegisterCallbackLogDebugMessage(pyCallbackLogDebugMessage)
 
-    # 4. Setup the BACnet device
-    # ---------------------------------------------------------------------------
-    logger.info("Setting up server Device. device.instance=%s", DEVICE_INSTANCE)
+    # 3. Setup the BACnet device
+    # ---------------------------------------------------------------------------------------------
+    logger.info("Setting up server Device. device.instance=%s",
+                DEVICE_INSTANCE)
     if not CASBACnetStack.BACnetStack_AddDevice(DEVICE_INSTANCE):
         logger.error("Failed to add Device")
         exit()
 
-    # Enable optional BACnet services.
+    # 4. Enable optional BACnet services.
+    # ---------------------------------------------------------------------------------------------
     for service in ["readPropertyMultiple", "writeProperty", "writePropertyMultiple", "subscribeCov", "subscribeCovProperty", "reinitializeDevice", "deviceCommunicationControl", "iAm", "confirmedTextMessage", "unconfirmedTextMessage"]:
-        CASBACnetStack.BACnetStack_SetServiceEnabled(DEVICE_INSTANCE, casbacnetstack_service[service], True)
+        logger.info("Enabling service: %s (%s)", service, casbacnetstack_service[service])
+        CASBACnetStack.BACnetStack_SetServiceEnabled(
+            DEVICE_INSTANCE, casbacnetstack_service[service], True)
 
-    # Add objects to the device
-    # ---------------------------------------------------------------------------
+    # 5. Add objects to the device
+    # ---------------------------------------------------------------------------------------------
     objectList = BACnetDatabase.GetObjectsList(DEVICE_INSTANCE)
     if objectList is None or len(objectList) == 0:
-        logger.error("No objects found in database for device instance %s", DEVICE_INSTANCE)
+        logger.error(
+            "No objects found in database for device instance %s", DEVICE_INSTANCE)
         exit()
+    AddObjectsFromDatabase(objectList)
 
-    for obj in objectList:
-        objectType, objectInstance = obj
-        if objectType == bacnet_objectType["device"]:
-            # Device object already added above
-            continue
-        if objectType == bacnet_objectType["networkPort"]:
-            # Network port object already added above
-            continue
-        if not CASBACnetStack.BACnetStack_AddObject(DEVICE_INSTANCE, objectType, objectInstance):
-            logger.error("Failed to add object. Type=%s Instance=%s", objectType, objectInstance)
-            exit()
-        # Look up the object type by the id in the bacnet_objectType dictionary
-        if objectType in bacnet_objectType.values():
-            objectTypeName = [name for name, value in bacnet_objectType.items() if value == objectType][0]
-            logger.info("Added object. %s (%s)", objectTypeName, objectInstance)
-
-    # Network port is a special object that needs to be added and configured
-    # ---------------------------------------------------------------------------        
+    # 6. Network port is a special object that needs to be added and configured
+    # ---------------------------------------------------------------------------------------------
     if AddAndConfigureNetworkPort(DEVICE_INSTANCE) is False:
         logger.error("Failed to add and configure network port")
         exit()
 
+    # 7. Connect the UDP resource to the BACnet Port and get network info
+    # ---------------------------------------------------------------------------------------------
+    udp_port = BACnetDatabase.Get(
+        DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"])
+    if udp_port is None:
+        logger.error("Failed to get UDP port")
+        exit()
+    ConnectToSocket(int(udp_port))
 
+    # 8. Send I-Am
+    # To be a good BACnet citizen, we need to send an I-Am broadcast to let other BACnet devices
+    # know we are here
+    # ---------------------------------------------------------------------------------------------
+    SendIAmBroadcast()
 
-
-    # 2. Connect the UDP resource to the BACnet Port and get network info
-    # ---------------------------------------------------------------------------
-    udp_port = int(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
-    logger.info("Connecting UDP Resource to port=%s", udp_port)
-    HOST = ""  # Symbolic name meaning all available interfaces
-    udpSocket.bind((HOST, udp_port))
-    udpSocket.setblocking(False)
-
-    # 5. Send I-Am of this device
-    # ---------------------------------------------------------------------------
-    # logger.info("Sending I-AM broadcast")
-    # addressString = (ctypes.c_uint8 * 6)()
-    # ipAddress = BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"])
-    # udpPort = int(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
-    # for i in range(4):
-    #     addressString[i] = int(ipAddress[i])
-    # addressString[4] = int(udpPort / 256)
-    # addressString[5] = udpPort % 256
-
-    # if not CASBACnetStack.BACnetStack_SendIAm(ctypes.c_uint32(DEVICE_INSTANCE), ctypes.cast(addressString, ctypes.POINTER(ctypes.c_uint8)),
-    #                                           ctypes.c_uint8(6), ctypes.c_uint8(casbacnetstack_networkType["ip"]), ctypes.c_bool(True),
-    #                                           ctypes.c_uint16(65535), None, ctypes.c_uint8(0)):
-    #     logger.error("Failed to send I-Am")
-
-
-
-
-    # 6. Start the main loop
-    # ---------------------------------------------------------------------------
+    # 9. Start the main loop
+    # ---------------------------------------------------------------------------------------------
     logger.info("Entering main loop...")
     while True:
-        # Call the DLLs loop function which checks for messages and processes them.
+        # Call the CAS BACnet Stack tick function which checks for messages and processes them.
+        # This function needs to be called at least once a second.
         CASBACnetStack.BACnetStack_Tick()
 
         # Sleep between loops. Give some time to other application
         time.sleep(0.1)
 
         # Every x seconds increment the AnalogInput presentValue property by 0.1
-        # if lastTimeValueWasUpdated + 1 < time.time():
-        #     lastTimeValueWasUpdated = time.time()
-        #     presentValue = float(BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"]))
-        #     presentValue += 0.1
-        #     BACnetDatabase.Set(DEVICE_INSTANCE, bacnet_objectType["analogInput"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"], presentValue)
-        #     # Notify the stack that this data point was updated so the stack can check for logic
-        #     # 		that may need to run on the data.  Example: check if COV (change of value) occurred.
-        #     if CASBACnetStack.BACnetStack_ValueUpdated is not None:
-        #         CASBACnetStack.BACnetStack_ValueUpdated(device_instance, bacnet_objectType["analogValue"], ANALOG_INPUT_BRONZE_INSTANCE, bacnet_propertyIdentifier["presentvalue"])
-        #     logger.info("Updating AnalogInput (0) PresentValue: %s", round(presentValue, 1))
+        if lastTimeValueWasUpdated + 1 < time.time():
+            lastTimeValueWasUpdated = time.time()
+            # updateValues()
