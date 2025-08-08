@@ -195,18 +195,13 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
 
     # Extract the Connection String from CAS BACnet Stack into an IP address and port.
     udpPort = connectionString[4] * 256 + connectionString[5]
+    ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
     if broadcast:
         # Use broadcast IP address
-        # ToDo: Get the subnet mask and apply it to the IP address
-        logger.debug("ToDo: Broadcast this message. Local IP: %s Subnet: %s Broadcast IP: ????",
-                     BACnetDatabase.Get(
-                         DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"]),
-                     BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"]))
-        ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
-            f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
-    else:
-        ipAddress = f"{connectionString[0]:.0f}.{connectionString[1]:.0f}." \
-            f"{connectionString[2]:.0f}.{connectionString[3]:.0f}"
+        ipAddress_list = GetBroadcastIPAddress()
+        if ipAddress_list:
+            ipAddress = f"{ipAddress_list[0]}.{ipAddress_list[1]}.{ipAddress_list[2]}.{ipAddress_list[3]}"
+        logger.debug("Broadcast this message. Broadcast IP: %s", ipAddress)
 
     # Extract the message from CAS BACnet Stack to a bytearray
     data = bytearray(messageLength)
@@ -216,6 +211,25 @@ def CallbackSendMessage(message, messageLength, connectionString, connectionStri
     # Send the message
     udpSocket.sendto(data, (ipAddress, udpPort))
     return messageLength
+
+def GetBroadcastIPAddress():
+    ipaddress = BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                       NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"])
+    ipsubnetmask = BACnetDatabase.Get(DEVICE_INSTANCE, bacnet_objectType["networkPort"],
+                       NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipsubnetmask"])
+
+    if ipaddress is None or ipsubnetmask is None:
+        logger.error("Failed to get IP address or subnet mask.")
+        return None
+
+
+    # The broadcast address is the IP address OR ipsubnetmask
+    # IP Address: [169, 254, 83, 107], Subnet Mask: [255, 255, 0, 0]
+    # Inverted mask: [0, 0, 255, 255], then OR with IP
+    broadcast_address = [ipaddress[i] | ((~ipsubnetmask[i]) & 0xFF) for i in range(4)]
+
+    # logger.debug("IP Address: %s, Subnet Mask: %s, Broadcast Address: %s", ipaddress, ipsubnetmask, broadcast_address)
+    return broadcast_address
 
 
 def CallbackGetSystemTime():
@@ -546,13 +560,84 @@ def AddAndConfigureNetworkPort(device_instance):
         logger.error("Failed to add networkPort")
         exit()
 
-    # Load network information into database
-    ip_address = [int(octet) for octet in netifaces.ifaddresses(
-        netifaces.interfaces()[0])[netifaces.AF_INET][0]["addr"].split(".")]
-    subnet_mask = [int(octet) for octet in netifaces.ifaddresses(
-        netifaces.interfaces()[0])[netifaces.AF_INET][0]["netmask"].split(".")]
-    default_gateway = [int(octet) for octet in netifaces.gateways()[
-        "default"][netifaces.AF_INET][0].split(".")]
+    # Get the primary ethernet interface (filter out virtual adapters)
+    def get_primary_interface():
+        interfaces = netifaces.interfaces()
+        logger.debug("Available interfaces: %s", interfaces)
+        
+        for interface in interfaces:
+            # Skip common virtual interfaces
+            interface_lower = interface.lower()
+            if any(skip_name in interface_lower for skip_name in [
+                'tailscale', 'loopback', 'vmware', 'virtualbox', 'vbox',
+                'docker', 'wsl', 'hyper-v', 'bluetooth', 'teredo'
+            ]):
+                logger.debug("Skipping virtual interface: %s", interface)
+                continue
+            
+            # Check if interface has IPv4 address
+            try:
+                addrs = netifaces.ifaddresses(interface)
+                if netifaces.AF_INET not in addrs:
+                    continue
+                    
+                ipv4_info = addrs[netifaces.AF_INET][0]
+                ip_addr = ipv4_info.get('addr')
+                
+                if not ip_addr:
+                    continue
+                
+                # Skip loopback addresses
+                if ip_addr.startswith('127.'):
+                    continue
+                    
+                # Skip Tailscale IP range (100.64.0.0/10)
+                ip_parts = [int(x) for x in ip_addr.split('.')]
+                if ip_parts[0] == 100 and 64 <= ip_parts[1] <= 127:
+                    logger.debug("Skipping Tailscale IP range: %s", ip_addr)
+                    continue
+                
+                # Skip other common virtual IP ranges
+                if (ip_parts[0] == 169 and ip_parts[1] == 254):  # APIPA
+                    logger.debug("Skipping APIPA address: %s", ip_addr)
+                    continue
+                
+                logger.info("Selected primary interface: %s with IP: %s", interface, ip_addr)
+                return interface
+                
+            except Exception as e:
+                logger.debug("Error checking interface %s: %s", interface, e)
+                continue
+        
+        # Fallback to first available interface if no suitable one found
+        logger.warning("No suitable primary interface found, using first available")
+        return interfaces[0] if interfaces else None
+
+    primary_interface = get_primary_interface()
+    if not primary_interface:
+        logger.error("No network interface available")
+        exit()
+
+    # Load network information from the primary interface
+    try:
+        interface_info = netifaces.ifaddresses(primary_interface)
+        ipv4_info = interface_info[netifaces.AF_INET][0]
+        
+        ip_address = [int(octet) for octet in ipv4_info["addr"].split(".")]
+        subnet_mask = [int(octet) for octet in ipv4_info["netmask"].split(".")]
+        
+        # Get default gateway
+        default_gateway = [int(octet) for octet in netifaces.gateways()[
+            "default"][netifaces.AF_INET][0].split(".")]
+        
+        logger.info("Using interface: %s", primary_interface)
+        logger.info("IP Address: %s", ".".join(map(str, ip_address)))
+        logger.info("Subnet Mask: %s", ".".join(map(str, subnet_mask)))
+        logger.info("Default Gateway: %s", ".".join(map(str, default_gateway)))
+        
+    except Exception as e:
+        logger.error("Failed to get network information from interface %s: %s", primary_interface, e)
+        exit()
     
     dnsServerOctetList = []
     for dnsServer in dns.resolver.Resolver().nameservers:
@@ -575,9 +660,7 @@ def AddAndConfigureNetworkPort(device_instance):
     logger.info("Local IP address: %s", ip_address)
     
 def SendIAmBroadcast():
-
-    ipAddress = BACnetDatabase.Get(
-        DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["ipaddress"])
+    ipAddress = GetBroadcastIPAddress()
     udpPort = int(BACnetDatabase.Get(
         DEVICE_INSTANCE, bacnet_objectType["networkPort"], NETWORK_PORT_VERMILLION_INSTANCE, bacnet_propertyIdentifier["bacnetipudpport"]))
     if ipAddress is None or udpPort is None:
@@ -585,8 +668,7 @@ def SendIAmBroadcast():
             "Missing IP address or UDP port. Can not send I-AM broadcast")
         return
 
-    logger.info("Sending I-AM broadcast ipAddress: %s, udpPort: %s",
-                ipAddress, udpPort)
+    logger.info("Sending I-AM broadcast ipAddress: %s, udpPort: %s", ipAddress, udpPort)
 
     # Convert the IP Address and UDP Port to a byte string that can be used by the CAS BACnet Stack
     addressString = (ctypes.c_uint8 * 6)()
@@ -836,4 +918,4 @@ if __name__ == "__main__":
         # Every x seconds increment the AnalogInput presentValue property by 0.1
         if lastTimeValueWasUpdated + 3 < time.time():
             lastTimeValueWasUpdated = time.time()
-            updateValues()
+            # updateValues()

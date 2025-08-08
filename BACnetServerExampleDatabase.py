@@ -56,7 +56,7 @@ class ExampleDatabase:
 
                 if propertyArrayIndex == 0:
                     # We are trying to find the array size
-                    print(f"Array size requested for property {propertyIdentifier}. Returning size: {len(raw_value)}")
+                    # print(f"Array size requested for property {propertyIdentifier}. Returning size: {len(raw_value)}")
                     return len(raw_value)
 
                 # BACnet starts counting the array index from 1
@@ -64,16 +64,16 @@ class ExampleDatabase:
                 propertyArrayIndex -= 1
 
                 if isinstance(raw_value, list) and propertyArrayIndex < len(raw_value):
-                    print(f"Array index {propertyArrayIndex} found for property {propertyIdentifier}: {raw_value[propertyArrayIndex]}")
+                    # print(f"Array index {propertyArrayIndex} found for property {propertyIdentifier}: {raw_value[propertyArrayIndex]}")
                     return str(raw_value[propertyArrayIndex])
                 else:
-                    print(f"Array index {propertyArrayIndex} out of range for property {propertyIdentifier}")
+                    #print(f"Array index {propertyArrayIndex} out of range for property {propertyIdentifier}")
                     return None
             elif isinstance(raw_value, list):
-                print(f"Array found for property {propertyIdentifier}: {raw_value}")
+                # print(f"Array found for property {propertyIdentifier}: {raw_value}")
                 return raw_value
             else:
-              print(f"Value found for property {propertyIdentifier}: {raw_value}")
+              # print(f"Value found for property {propertyIdentifier}: {raw_value}")
               return str(raw_value)
         except KeyError:
             print(f"Failed to retrieve value for Device {deviceInstance}, Object Type {objectType}, Instance {objectInstance}, Property {propertyIdentifier}")
