@@ -918,4 +918,4 @@ if __name__ == "__main__":
         # Every x seconds increment the AnalogInput presentValue property by 0.1
         if lastTimeValueWasUpdated + 3 < time.time():
             lastTimeValueWasUpdated = time.time()
-            # updateValues()
+            updateValues()
