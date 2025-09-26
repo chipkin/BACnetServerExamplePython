@@ -7,7 +7,7 @@
 import ctypes
 import platform
 
-casbacnetstack_adapter_version = "0.0.4"  # For CASBACnetStack version 3.25.0 or greater
+casbacnetstack_adapter_version = "0.0.5"  # For CASBACnetStack version 3.25.0 or greater
 
 # libname
 # ---------------------------------------------------------------------------
